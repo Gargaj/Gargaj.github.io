@@ -71,6 +71,7 @@ According to <a href="http://www.cl.cam.ac.uk/~mgk25/iso-time.html">Markus Kühn
 Without any further additions, a date and time as written above is assumed to be in some local time zone. 
 In order to indicate that a time is measured in Universal Time (UTC), you can append a capital letter Z [...]
 </blockquote>
+In other words, omitting the "Z" ending or an explicit time zone implies local time zone.
 </p>
 
 <h2>The ECMAScript 5.1 standard</h2>
@@ -80,6 +81,7 @@ According to <a href="http://www.ecma-international.org/ecma-262/5.1/#sec-15.9.1
 ECMAScript defines a string interchange format for date-times based upon a simplification of the ISO 8601 Extended Format. [...]
 The value of an absent time zone offset is “Z”.
 </blockquote>
+Here, omitting the "Z" ending implies the same as adding "Z", i.e. UTC.
 </p>
 
 <h2>The output</h2>
@@ -95,7 +97,7 @@ Note: here we're assuming the code runs in Central European Time (+1:00)
   <dt>Chrome 36.0</dt>
   <dd>
     <code><pre>Wed Feb 27 2013 18:00:00 GMT+0100 (Central Europe Standard Time)</pre></code>
-    The string is treated as UTC - This is following the ECMAScript 5.1 standard.
+    The string is treated as UTC - this is following the ECMAScript 5.1 standard.
   </dd>
 </dl>
 
