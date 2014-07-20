@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title></title>
+  <title>The Clusterfuck of Date Parsing</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,700|PT+Mono|Lobster+Two' rel='stylesheet' type='text/css'>
   <style type="text/css">
@@ -23,6 +23,7 @@ h1 {
 }
 dt {
   font-weight: 400;
+  font-size: 125%;
 }
 dd {
   margin-bottom: 20px;
@@ -34,6 +35,9 @@ body {
 pre {
   font-family: "PT Mono", monospace;
   color: #464;
+  background: #f8fff8;
+  padding: 10px;
+  border: 1px solid #cdc;
 }
 blockquote {
   font-style: italic;
@@ -44,6 +48,11 @@ a {
 }
 a:hover {
   color: #888;
+}
+footer {
+  color: #ccc;
+  text-align: center;
+  padding: 30px;
 }
 </style>
 </head>
@@ -78,21 +87,25 @@ The value of an absent time zone offset is “Z”.
 Note: here we're assuming the code runs in Central European Time (+1:00)
 </p>
 <dl>
-  <dt>Firefox</dt>
+  <dt>Firefox 31.0</dt>
   <dd>
     <code><pre>Wed Feb 27 2013 17:00:00 GMT+0100 (Central Europe Daylight Time)</pre></code>
     The string is treated as local time - this is following the ISO 6801 standard.
   </dd>
-  <dt>Chrome</dt>
+  <dt>Chrome 36.0</dt>
   <dd>
     <code><pre>Wed Feb 27 2013 18:00:00 GMT+0100 (Central Europe Standard Time)</pre></code>
-    The string is treated as utc - This is following the ECMAScript 5.1 standard.
+    The string is treated as UTC - This is following the ECMAScript 5.1 standard.
   </dd>
 </dl>
 
 <p>
 So where does this leave the developer? Somewhere in a dark room with mild weeping sounds.
 </p>
+
+<footer>
+Gargaj / Conspiracy, 2014.07.20.
+</footer>
 
 </body>
 </html>
