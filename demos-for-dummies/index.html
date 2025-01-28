@@ -1,0 +1,1219 @@
+<!doctype html>
+<html>
+<head>
+  <title>Demos For Dummies</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap');
+
+    *
+    {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body
+    {
+      background: #3B3E3D;
+      color: #eee;
+      font-family: "Roboto", sans-serif;
+    }
+    main
+    {
+      width: 50vw;
+    }
+    h1
+    {
+      margin: 30px 20px;
+    }
+    main article
+    {
+      margin-bottom: 30px;
+    }
+    main article h2
+    {
+      margin: 20px;
+    }
+    main article p
+    {
+      line-height: 1.4em;
+      margin: 0.5em 0;
+    }
+    main article > p
+    {
+      margin-left: 20px;
+      margin-right: 40px;
+    }
+    p code 
+    {
+      display: inline-block;
+      background: #2d3130;
+      padding: 0px 6px;
+      font-family: "Source Code Pro", monospace;
+    }
+    main article section
+    {
+      margin: 20px;
+      margin-right: 30px;
+      padding: 10px 20px;
+      background: #424645;
+    }
+    main article section.current 
+    {
+      background: #624646;
+    }
+    main article section ol
+    {
+      margin: 20px;
+    }
+    main article section li
+    {
+      line-height: 1.5em;
+    }
+    main article section[data-substep]
+    {
+      cursor: pointer;
+    }
+    aside#code
+    {
+      background: #282C34;
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 50vw;
+      height: 100vh;
+      padding: 20px 0;
+      overflow-y: scroll;
+      scroll-behavior: smooth;
+    }
+    aside#code pre, aside#code pre code
+    {
+      margin: 0;
+      white-space: break-spaces;
+      font-family: "Source Code Pro", monospace;
+      font-size: 12px;
+    }
+    aside#code pre.step-highlight
+    {
+      background: #3c3f48;
+    }
+    aside#code pre.highlight
+    {
+      background: #624646;
+    }
+    .hljs
+    {
+      background: none;
+    }
+    pre code.hljs
+    {
+      padding: 0 20px;
+    }
+    a
+    {
+      color: #ccc;
+    }
+    button#next 
+    {
+      margin: 20px auto;
+      display: block;
+      font-size: 32px;
+      background: none;
+      border: none;
+      color: #54575B;
+      cursor: pointer;
+      width: 200px;
+      border-radius: 20px;
+      transition: 300ms ease all;
+    }
+    button#next:hover
+    {
+      background: #424446;
+      color: #6B6F75;
+    }
+    </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>
+  var steps = [];
+  function highlight(highlightedStep, highlightedSubstep)
+  {
+    var lines = [];
+    var highlightedStepIdx = steps.indexOf(highlightedStep);
+    [...document.querySelectorAll("#code pre")].forEach((i)=>{
+      var stepIdx = steps.indexOf(i.getAttribute("data-step"));
+      var substepIdx = i.getAttribute("data-substep");
+      i.classList.remove("step-highlight");
+      i.classList.remove("highlight");
+      if (stepIdx == highlightedStepIdx && stepIdx != -1)
+      {
+        if (substepIdx == highlightedSubstep)
+        {
+          lines.push(i);
+        }
+        i.classList.add(substepIdx == highlightedSubstep ? "highlight" : "step-highlight");
+        i.style.display = "block";
+      }
+      else if(stepIdx < highlightedStepIdx && stepIdx != -1)
+      {
+        i.style.display = "block";
+      }
+      else
+      {
+        i.style.display = "none";
+      }
+    });
+    for(var i=0; i<=currentSubStepIdx; i++)
+    {
+      [...document.querySelectorAll("main article section")].forEach(i=>{ i.classList.remove("current"); } );
+    }
+    var stepElement = document.querySelector("main article[data-step=\""+steps[highlightedStepIdx]+"\"] section[data-substep=\""+highlightedSubstep+"\"]");
+    if (stepElement)
+    {
+      stepElement.classList.add("current");
+      setTimeout(function(){ stepElement.scrollIntoView(); }, 10);
+    }
+    
+    location.hash = highlightedStep + "/" + highlightedSubstep;
+    if (lines.length)
+    {
+      lines[Math.floor(lines.length/2)].scrollIntoView({"block":"center"});
+    }
+  }
+  function isElementInViewport (el)
+  {
+    var rect = el.getBoundingClientRect();
+
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+  }
+  function moveTo(stepIdx,substepIdx)
+  {
+    currentStepIdx = stepIdx;
+    currentSubStepIdx = substepIdx;
+    for(var i=0; i<=currentStepIdx; i++)
+    {
+      [...document.querySelectorAll("main article[data-step=\""+steps[i]+"\"]")].forEach(i=>i.style.display="block");
+      if (i < currentStepIdx)
+      {
+        [...document.querySelectorAll("main article[data-step=\""+steps[i]+"\"] section")].forEach(i=>i.style.display="block");
+      }
+    }
+    for(var i=0; i<=currentSubStepIdx; i++)
+    {
+      [...document.querySelectorAll("main article[data-step=\""+steps[stepIdx]+"\"] section[data-substep=\""+i+"\"]")].forEach(i=>{ i.style.display="block"; i.classList.remove("current"); } );
+    }
+    highlight(steps[stepIdx],substepIdx);
+    document.querySelector("main article[data-step=\""+steps[stepIdx]+"\"] section[data-substep=\""+substepIdx+"\"]")?.classList.add("current");
+    document.getElementById("next").scrollIntoView();
+    document.getElementById("next").style.display = stepIdx >= steps.length - 1 ? "none" : "block";
+  }
+  var currentStepIdx = -1;
+  var currentSubStepIdx = 0;
+  function next()
+  {
+    var maxSubStep = 0;
+    if (currentStepIdx >= 0)
+    {
+      [...document.querySelector("main article[data-step=\""+steps[currentStepIdx]+"\"]").querySelectorAll("section[data-substep]")].forEach(i=>{
+        maxSubStep = Math.max(maxSubStep, i.getAttribute("data-substep"));
+      });
+    }
+    if (currentSubStepIdx >= maxSubStep)
+    {
+      currentStepIdx++;
+      currentSubStepIdx = 1;
+    }
+    else
+    {
+      currentSubStepIdx++;
+    }
+    moveTo(currentStepIdx, currentSubStepIdx);
+  }
+  window.onload = function()
+  {
+    [...document.querySelectorAll("main article")].map((i)=>{
+      var step = i.getAttribute("data-step");
+      if (!step)
+      {
+        return;
+      }
+      i.style.display = "none";
+      steps.push(step);
+    });
+    [...document.querySelectorAll("main article section")].map((i)=>{
+      var substep = i.getAttribute("data-substep");
+      var step = i.parentNode.getAttribute("data-step");
+      i.style.display = "none";
+      i.onclick = function(e)
+      {
+        highlight(step, substep);
+      }
+    });
+    document.getElementById("next").onclick = function(e)
+    {
+      next();
+    }
+    hljs.highlightAll();
+    if (location.hash.length > 1)
+    {
+      var parts = location.hash.substring(1).split("/");
+      moveTo(steps.indexOf(parts[0]), parts[1]);
+    }
+    else
+    {
+      next();
+    }
+  };
+  </script>
+</head>
+<main>
+  <h1>How to start writing an actual demo in &lt;400 lines</h1>
+  
+  <article data-step="intro">
+    <h2>So why is this even a thing?</h2>
+    <p>
+      Okay. Here's the deal.
+    </p>
+    <p>
+      I'm so incredibly, <b>debilitatingly</b> tired of this recurring syndrome
+      in the <a href="https://en.wikipedia.org/wiki/Demoscene"
+      title="Wikipedia article linked in case some people in it forget what it's about">demoscene</a>
+      wherein someone innocent and wide-eyed shows up and expresses some
+      interest about getting started with demo coding, and the immediate
+      reaction is to stick a pointy-clicky demotool in their hands and
+      call it a day, and then the net result is a demo compo where half
+      the entries run on Unity or Unreal, and the other half don't run
+      at all.
+    </p>
+    <p>
+      This is ridiculous, this is embarrassing, this is unsustainable,
+      and worst of all <a href="https://web.archive.org/web/20160313113613/http://blog.kebby.org/?p=47">we've
+      been here before</a>. To this end, I decided to stick my money where
+      my mouth is by providing you a quick walkthrough on how to render a mesh on screen using
+      modern, reliable methods, in about ~40 steps and less than 400 lines
+      of code, in a perhaps futile attempt to a) demonstrate that starting
+      actual demo coding isn't as hard as people make it sound and 
+      b) make people care about - let's remember - what 
+      <a href="https://demoscene-the-art-of-coding.net/the-demoscene/">we told UNESCO</a>
+      this stuff is supposed to be about.
+    </p>
+    <p>
+      As you can tell, this is a tutorial intended for people who can already
+      program in C++, and some linear algebra and basic understanding of
+      rendering is recommended.
+      We'll be using C++ and DirectX 11 to render stuff, the simple reason
+      being that we would very much like our demo to work - you can play
+      around with OpenGL if you must, but let's face it: you're never going
+      to compile for Mac or Linux, and the audience you lose there is a fraction
+      of what you lose by making your demo GPU-vendor specific.
+      (If you really <b>really</b> must, the Internet is chock full with
+      <a href="https://lazyfoo.net/tutorials/SDL/">SDL tutorials</a>.)
+    </p>
+    <p>
+      With that in mind, let's go.
+    </p>
+  </article>
+  
+  <article data-step="stub">
+    <h2>The basics</h2>
+    <section data-substep="1">
+      <p>
+        I'm not even going to explain this; if this step stumps you already
+        you're probably better off at 
+        <a href="https://www.codecademy.com/resources/docs/cpp">Codecademy</a> 
+        or something.
+      </p>
+    </section>
+  </article>
+  <article data-step="window">
+    <h2>Opening a window</h2>
+    
+    <p>
+      Right, so the first step in our plumbing process is going to be opening
+      a window through WINAPI; this is a fairly well documented process so
+      we're going to just go through it quickly because let's face it - you
+      can waste all the time in the world on this to make it nice and shiny,
+      but it doesn't actually matter. You can do that later once everything else
+      is in place.
+    </p>
+    
+    <section data-substep="1">
+      <p>
+        First, we include <code>windows.h</code>, which contains the declarations
+        for all the stuff that we'll be using.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        Then we create a "window class"; this basically defines the behavior of
+        our window, but the only thing we really care about right now is the
+        window procedure (which we'll call <code>WndProc</code>),
+        which is a callback that defines how a window reacts
+        when something happens; if you want to learn more,
+        <a href="https://learn.microsoft.com/en-us/windows/win32/winmsg/about-window-classes">the official documentation</a>
+        is always there.      
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        Our window procedure is simple as a stick: we have a 
+        <code>gWindowWantsToQuit</code> flag that signals if the user wants to quit,
+        and we set it to true if either someone pressed Escape or the window close
+        button. We also disable the screensaver.
+      </p>
+      <p>
+        Again, none of this is relevant to our demo 
+        and <a href="https://learn.microsoft.com/en-us/windows/win32/learnwin32/window-messages">you can read all about it</a> later.
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        Finally we open a window where the client area (i.e. without the title
+        bar and border) is 1280x720. Again, 
+        <a href="https://learn.microsoft.com/en-us/windows/win32/learnwin32/creating-a-window">read the docs</a> if you're curious.
+      </p>
+    </section>
+    <section data-substep="5">
+      <p>
+        Here's our main loop, this is what we will continually be running until
+        user input tells us to stop: Right now it does nothing except ensure
+        that everything that happens to the window is processed (as usual, <a href="https://learn.microsoft.com/en-us/windows/win32/winmsg/using-messages-and-message-queues">docs</a>, 
+        but hilariously <a href="https://en.wikipedia.org/wiki/Message_loop_in_Microsoft_Windows">even Wikipedia</a>),
+        but eventually everything that's not loading will happen here.
+      </p>
+    </section>
+    <section data-substep="6">
+      <p>
+        Finally we deallocate everything because we're not lazy slobs.
+      </p>
+      <p>
+        At this point if you compile and run this you should get a nice big
+        solid colored window that does nothing except close when you press Esc.
+        So far so good.
+      </p>
+    </section>
+  </article>
+  <article data-step="audio">
+    <h2>Adding music replay</h2>
+    <p>
+      We have our window, so let's add some audio first; we're going to use
+      Miniaudio for this because we're not going to bother writing our own
+      MP3 player. (You can do that later.)
+    </p>
+    <section data-substep="1">
+      <p>
+        First, let's get <code>miniaudio.h</code>;
+        it's a single file, so just <a href="https://raw.githubusercontent.com/mackron/miniaudio/4a5b74bef029b3592c54b6048650ee5f972c1a48/miniaudio.h">download it from the original repo</a>
+        and place it next to your <code>main.cpp</code>.
+      </p>
+      <p>
+        Now, you may wonder what <code>#define MINIAUDIO_IMPLEMENTATION</code>
+        does - don't. You can wonder about that later.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        Next, we initialize the sound player and load our music (supplying the MP3
+        file is left up to the reader); once again, <a href="https://miniaud.io/docs/manual/index.html#HighLevelAPI">there's docs</a> 
+        and that's all you need to know.
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        Then in our mainloop, we continually poll the timer of where our music
+        replay is (in seconds), so that we can use that to synchronize our demo.
+        There's nothing to synchronize just yet, of course.
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        And again, we deallocate everything once we're done.
+      </p>
+      <p>
+        So now our empty window should have sound. Cool, let's keep on going.
+      </p>
+    </section>
+  </article>
+  <article data-step="graphics-dxinit">
+    <h2>Initializing DirectX</h2>
+    <p>
+      Now it's time for the first bigger lift: Connecting DirectX 11.0 to our
+      window.
+    </p>
+    <section data-substep="1">
+      <p>
+        First, the usual includes; generally <code>#pragma</code>-ing a library
+        in a source file is considered bad form, but we're keeping everything
+        in a single file just for completeness sake - otherwise, you know how
+        to use linker settings, right...?
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        Next, we initialize Direct3D 11 by telling it what size window we have
+        and how we want it to work; as usual, <a href="https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-d3d11createdeviceandswapchain">there's docs</a>
+        and you'll undoubtably learn about what a swap chain is, but for now,
+        you don't need to care beyond "thing that puts picture on screen".
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        We then fetch our back buffer - the screen buffer we're rendering into
+        - from D3D, and create a render target view for it; "views" are
+        essentially D3D11's way of representing a buffer to a subsystem,
+        so e.g. a texture can have a "shader view" so that shaders can use it,
+        but also a "render target view" so that you can use it as a render target.
+        This may sound complicated, but it will all make sense in the end.
+      </p>
+      <p>
+        Now, because we're hoping to render some 3D, we'll also create a
+        depth-stencil texture (if you don't know what a Z-buffer is,
+        <a href="https://en.wikipedia.org/wiki/Z-buffering">just read Wikipedia</a>)
+        and a depth stencil view - see above. This way, stuff that's up front
+        will correctly occlude what's in the back.
+      </p>
+      <p>
+        This concludes our initialization phase, so we can move on to rendering.
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        ...Okay, so rendering won't be too exciting for now, since we have nothing
+        to render yet, but we can clear the screen with an arbitrary color and
+        that's good enough so far. We're going to use a non-black colour here
+        just so that we can see if we've done anything - you can use whatever
+        you like.
+      </p>
+      <p>
+        We're also clearing the depth buffer, but that won't have much of an
+        effect until later.
+      </p>
+      <p>
+        (Sidequest: You can totally animate the clear color with the music
+        position, if you feel so inspired.)
+      </p>
+    </section>
+    <section data-substep="5">
+      <p>
+        Once we're done with our "rendering" (we'll get there, promised),
+        we just tell the swap chain to "present" our buffer, i.e. put it on
+        screen.
+      </p>
+    </section>
+    <section data-substep="6">
+      <p>
+        ...And we deallocate because we're wonderful people.
+      </p>
+      <p>
+        With that, our window now has color - sweet! Let's move on to
+        loading a mesh.
+      </p>
+    </section>
+  </article>
+  <article data-step="graphics-meshload">
+    <h2>Loading a mesh</h2>
+    <p>
+      Now we're going to load a mesh from a <a href="https://en.wikipedia.org/wiki/GlTF">GLTF file</a>
+      - why that format you may ask? Because it's as good as any.
+    </p>
+    <section data-substep="1">
+      <p>
+        We're going to use <a href="https://github.com/jkuhlmann/cgltf">cgltf</a>, 
+        so <a href="https://raw.githubusercontent.com/jkuhlmann/cgltf/7adbd821aa89d4878540fe774bd79165ad06be1b/cgltf.h">get the file</a>
+        and <code>#include</code> it; don't worry about <code>#define _CRT_SECURE_NO_WARNINGS</code>,
+        just trust me.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        The first thing we need to do is create a <a href="https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ns-d3d11-d3d11_rasterizer_desc">rasterizer state</a>
+        because reasons I'll explain later.
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        Next, we load the mesh - again, <a href="https://github.com/jkuhlmann/cgltf/blob/master/README.md#usage-loading">docs</a> are your friend.
+      </p>
+      <p>
+        (As usual, supplying the mesh is an exercise left to the reader, but I heard
+        <a href="https://www.blender.org/">Blender</a> is free now, so chop-chop!)
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        Once the mesh is loaded, we create <a href="https://learn.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-buffers-intro">a vertex and index buffer</a>
+        that houses our mesh data; really all we're doing is taking our mesh data
+        provided by our the buffer views in cgltf and telling D3D11 to
+        <a href="https://learn.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-buffers-vertex-how-to">create a vertex buffer</a>
+        out of it; index buffers work on the same principle, pretty much.
+      </p>
+    </section>
+    <section data-substep="5">
+      <p>
+        And we deallocate, as we should have gotten used to it now.
+      </p>
+      <p>
+        You'll note that we haven't rendered anything - that's because we
+        can't really render anything without shaders. That's next.
+      </p>
+    </section>
+  </article>
+  <article data-step="graphics-shaders">
+    <h2>Adding shaders</h2>
+    <p>
+      So, shaders, then.
+    </p>
+    <p>
+      <a href="https://en.wikipedia.org/wiki/Shader">Shaders</a> 
+      are probably the most misunderstood part of the rendering
+      toolkit, thanks in no small part to Shadertoy, that led way too many people
+      to believe that the only way to render 3D with a computer is by combining
+      crazy unintuitive maths into a signed distance field function (and then
+      wondering why the frame-rate drops through the floor in fullscreen).
+      Rest assured, while there's useful stuff to learn from there,
+      that use of shaders is niche, and should not be taken as gospel.
+    </p>
+    <p>
+      Short version: no, that's not what shaders are. Long version is that
+      there are many shader types from vertex through compute to pixel/fragment,
+      and all they do is provide a way to run functions to produce that given
+      vertex or pixel when the rendering pipeline reaches that stage -
+      a vertex shader's job is to transform the raw mesh data onto their final
+      position on the screen, while a pixel shader's job is to calculate
+      the final color of a pixel on screen as it is being rendered.
+    </p>
+    <p>
+      At the bare minimum, we will need a vertex and a pixel shader to get
+      anything on screen, so that's what we will use.
+    </p>
+    <section data-substep="1">
+      <p>
+        First, we include D3D11's shader compiler.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        This is going to be our super basic shader for now - as you can see
+        all it does is take the input vertex position, and then sends it through
+        to the output immediately, and the pixel shader literally just paints 
+        white - we'll iterate on these later, but let's get our plumbing 
+        done first.
+        (Before you ask: Yes, you can have the shader in a separate text file if you want to,
+        we're just including here as a string to, as said before,
+        keep everything in a single source file for demonstration's sake.
+        Incidentally, running your demo in a window and reloading the shader file
+        if it has changed is the most basic version of a "demotool".)
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        For both shaders, we compile them, telling the compiler which entry
+        point to look for and in what shader version 
+        (<a href="https://learn.microsoft.com/en-us/windows/win32/api/d3dcompiler/nf-d3dcompiler-d3dcompile">docs</a>)
+        and once it has compiled it, we use the resulting blob to create the
+        actual shader. We do this for both the vertex and pixel shader.
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        We also create an "<a href="https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nn-d3d11-id3d11inputlayout">input layout</a>"
+        where we effectively tell the system the format (or "layout") of our vertex buffer and
+        match it to our vertex shader; here we're telling it that our vertex
+        only consists of a single position field, and that the position is three (X, Y, Z) 
+        floating point numbers.
+      </p>
+    </section>
+    <section data-substep="5">
+      <p>
+        Now finally we get to actually render some stuff - 
+        the code looks like a lot of fluff, but it's
+        really not that bad once you get the hang of it:
+        <ol>
+          <li>First we set the viewport; this tells the API which part of the
+            screen to render on - we're gonna render to the whole screen.</li>
+          <li>Then we set the render target, i.e. which buffer to render to -
+            we only have a back buffer, so choose that, but this is where we 
+            could also be rendering into a texture.</li>
+          <li>Next, we set our two shaders, the rasterizer state and our input layout.</li>
+          <li>We only have one vertex buffer, so we set that as well - it's 
+            possible to have more than one, but let's not care about that for now.</li>
+          <li>We also set our index buffer - indices can be 16 or 32 bit, so we decide based on the data cgltf provided.</li>
+          <li>We also tell the API that our buffers are a list of triangles - 
+            <a href="https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3d10-graphics-programming-guide-primitive-topologies">there are other kinds</a>,
+            but they're not important most of the time.</li>
+          <li>And finally we perform the actual rendering - whee!.</li>
+        </ol>
+        See? Not that bad after all!
+      </p>
+      <p>
+        (Worth mentioning if it isn't obvious that you don't need to set all of this
+        for every single rendered object, you only need to set stuff that changes
+        inbetween Draw calls.)
+      </p>
+    </section>
+    <section data-substep="6">
+      <p>
+        And before we go, we clean up.
+      </p>
+      <p>
+        So now if you run the whole thing, you should get a white,
+        static, stretched mesh; not great, but we rendered something! 
+        With the GPU! Yay!
+      </p>
+    </section>
+  </article>
+  <article data-step="graphics-animation">
+    <h2>Adding some animation</h2>
+    <p>
+      Next up we're going to add some animation, and fix the stretchiness.
+      For that, we're going to use some vector maths, and for that
+      we'll be using a math library called
+      <a href="https://github.com/jobtalle/ccVector">ccVector</a>.
+    </p>
+    <section data-substep="1">
+      <p>
+        <a href="https://raw.githubusercontent.com/jobtalle/ccVector/ffefafe5a0b9a20c4495afc2e2012c4ae7ef0c1b/ccVector.h">Download the file</a>
+        and include it.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        First we're going to create a "<a href="https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-constants">constant buffer</a>":
+        Think of this as shared memory between your program and the shader - you
+        write into it, the shader can read it.
+      </p>
+      <p>
+        For now, we're going to put two 4x4 matrices into it: a <a href="https://en.wikipedia.org/wiki/Projection_matrix">projection matrix</a>
+        and a world transform (or object) matrix. Since we have two of them, our buffer
+        will be 16 * 2 = 32 floats.
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        We then add the constant buffer declaration to the shader, and use it to transform our vertices;
+        first from object-space to world-space using the world matrix, 
+        and then from world-space to screen-space using the projection matrix.
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        In our rendering loop, to the first half of the buffer, we create a
+        standard perspective matrix: our field-of-view angle will be quarter PI
+        (= 45 degrees), we calculate the aspect ratio from our window size, and
+        our near and far plane distances are just arbitrary values that work
+        for this scenario.
+        (Again, <a href="https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixperspectivefovlh">docs</a>.)
+      </p>
+      <p>
+        For the second matrix, we just rotate it along the Y (vertical) axis,
+        and move it slightly forward so that it doesn't clip into our viewpoint
+        (which is at world zero).
+      </p>
+      <p>
+        (You may wonder if you constantly have to hardwire your data into specific
+        positions of the constant buffer: no, you don't have to, that's where
+        <a href="https://learn.microsoft.com/en-us/windows/win32/api/d3dcompiler/nf-d3dcompiler-d3dreflect">shader reflection</a>
+        comes in.)
+      </p>
+      <p>
+        Let's also go back to our rasterizer state and explain why it's useful:
+        The problem is that our chosen math library provides matrices that are 
+        <a href="https://en.wikipedia.org/wiki/Right-hand_rule">right-handed</a>
+        (i.e. Y increases up and Z increases backwards), but cgltf provides
+        meshes that are left-handed (i.e. Z <u>increases</u> forwards), and
+        this causes our triangles to face the wrong way <a href="https://en.wikipedia.org/wiki/Back-face_culling">and disappear</a>
+        - so we use the rasterizer state to flip this setting to what we want.
+      </p>
+      <p>
+        Think this is annoying? Welcome to demo coding.
+      </p>
+    </section>
+    <section data-substep="5">
+      <p>
+        All that's left is copy the our (local) constant buffer into
+        the memory of the GPU, and then tell the vertex shader to use it.
+      </p>
+    </section>
+    <section data-substep="6">
+      <p>
+        ...And to clean up.
+      </p>
+      <p>
+        So now if you run our executable, our mesh is no longer stretched,
+        and rotates - probably. Kinda hard to tell. So all that's left is
+        to texture it.
+      </p>
+    </section>
+  </article>
+  <article data-step="graphics-textures">
+    <h2>Adding a texture</h2>
+    <p>
+      Like with everything so far, we're not going to write our own image
+      decompressor, instead we're just going to use 
+      <a href="https://github.com/nothings/stb/">the legendary STB libraries</a>.
+      (Once again, providing a texture is an exercise left to the reader.)
+    </p>
+    <section data-substep="1">
+      <p>
+        As usual, <a href="https://raw.githubusercontent.com/nothings/stb/013ac3beddff3dbffafd5177e7972067cd2b5083/stb_image.h">download the file</a>
+        and include it.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        To load the texture to memory, simply give it the filename, and a few
+        variables that we'll be using later.
+      </p>
+      <p>
+        Note that we're freeing the memory early, <b>before</b> our mainloop 
+        - this is because once we moved the texture data from our memory to 
+        graphics memory, our copy isn't needed anymore.
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        Next up we <a href="https://learn.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-textures-create">create a texture</a>
+        using the pixel data we have just received from the STB library,
+        and we create a shader resource view for it - you'll remember the views
+        from earlier, and we use this here so that we can use this texture in 
+        our shader.
+      </p>
+      <p>
+        The only thing that may need explanation is the <code>SysMemPitch</code>
+        field, but <a href="https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ns-d3d11-d3d11_subresource_data">the docs</a> 
+        should make its purpose obvious.
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        In our shader, first we generate a texture coordinate in our VS - these aren't
+        real, artist-assigned texture coordinates, just an ugly projection, but for proving that
+        stuff works they'll work fine - and for each rendered pixel in our PS, we sample
+        our new texture and return it as our final rendered color.
+      </p>
+    </section>
+    <section data-substep="5">
+      <p>
+        In our rendering code, the only change is that we assign the texture
+        as our pixel shader resource (since it's the pixel shader using it).
+      </p>
+    </section>
+    <section data-substep="6">
+      <p>
+        And we deallocate.
+      </p>
+    </section>
+  </article>
+  <article data-step="outro">
+    <h2>And that's it.</h2>
+    <p>
+      You have a model you loaded from a file that animates, it has a texture
+      on it, you have music that plays, and the whole thing even quits on
+      Escape - what more would you want?
+    </p>
+    <p>
+      ...In fairness, probably a whole lot more - fullscreen, vsync, cameras, 
+      mipmaps, real texture coordinates and normals, multiple objects, keyframed
+      animation, lighting, postprocessing, and so on - but that's where the
+      real fun begins where you get to pick and choose what features you get to
+      write for your future demo, and slowly, incrementally build your
+      own engine / framework / toolset.
+    </p>
+    <p>
+      I'm only giving you the runway here. The whole "flying" part you have to
+      do yourself.
+    </p>
+  </article>
+  <button id="next">Next</button>
+</main>
+<aside id="code">
+  <pre data-step="graphics-meshload"  data-substep="1"><code class="language-cpp">#define _CRT_SECURE_NO_WARNINGS</code></pre>
+  <pre data-step="window"             data-substep="1"><code class="language-cpp">#include &lt;windows.h&gt;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="1"><code class="language-cpp">#include &lt;d3d11.h&gt;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="1"><code class="language-cpp">#include &lt;d3dcompiler.h&gt;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="1"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="1"><code class="language-cpp">#pragma comment(lib,"d3d11.lib")</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="1"><code class="language-cpp">#pragma comment(lib,"d3dcompiler.lib")</code></pre>
+  <pre data-step="audio"              data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="audio"              data-substep="1"><code class="language-cpp">#define MINIAUDIO_IMPLEMENTATION</code></pre>
+  <pre data-step="audio"              data-substep="1"><code class="language-cpp">#include "miniaudio.h"</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="1"><code class="language-cpp">#define CGLTF_IMPLEMENTATION</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="1"><code class="language-cpp">#include "cgltf.h"</code></pre>
+  <pre data-step="graphics-animation" data-substep="1"><code class="language-cpp">#include "ccVector.h"</code></pre>
+  <pre data-step="graphics-textures"  data-substep="1"><code class="language-cpp">#define STB_IMAGE_IMPLEMENTATION</code></pre>
+  <pre data-step="graphics-textures"  data-substep="1"><code class="language-cpp">#include "stb_image.h"</code></pre>
+  <pre data-step="window"             data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">bool gWindowWantsToQuit = false;</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">LRESULT CALLBACK WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">{</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">  switch ( uMsg )</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">  case WM_KEYDOWN:</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">    {</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">      switch ( wParam )</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">      {</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">      case VK_ESCAPE:</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">        {</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">          gWindowWantsToQuit = true;</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">        } break;</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">      }</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">    } break;</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">  case WM_SYSCOMMAND:</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">    {</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">      switch ( wParam )</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">      {</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">      case SC_SCREENSAVE:</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">      case SC_MONITORPOWER:</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">        {</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">          return 0;</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">        }</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">      }</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">    } break;</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">  case WM_CLOSE:</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">    {</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">      gWindowWantsToQuit = true;</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">    } break;</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">  return DefWindowProcA( hWnd, uMsg, wParam, lParam );</code></pre>
+  <pre data-step="window"             data-substep="3"><code class="language-cpp">}</code></pre>
+  <pre data-step="stub-libraries"     data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="stub"               data-substep="0"><code class="language-cpp">int main()</code></pre>
+  <pre data-step="stub"               data-substep="0"><code class="language-cpp">{</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  const char * windowClassName = "DemosForDummiesWindowClass";</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  WNDCLASSA windowClass;</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  windowClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  windowClass.lpfnWndProc = &WndProc;</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  windowClass.cbClsExtra = 0;</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  windowClass.cbWndExtra = 0;</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  windowClass.hInstance = GetModuleHandle( nullptr );</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  windowClass.hIcon = nullptr;</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  windowClass.hCursor = LoadCursor( nullptr, IDC_ARROW );</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  windowClass.hbrBackground = nullptr;</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  windowClass.lpszMenuName = nullptr;</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  windowClass.lpszClassName = windowClassName;</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  if ( !RegisterClassA( &windowClass ) )</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  {</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="window"             data-substep="2"><code class="language-cpp">  }</code></pre>
+  <pre data-step="window"             data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">  const int width = 1280;</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">  const int height = 720;</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">  const DWORD exStyle = WS_EX_APPWINDOW;</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">  const DWORD style = WS_OVERLAPPEDWINDOW | WS_VISIBLE;</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">  RECT windowRect = { 0, 0, width, height };</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">  AdjustWindowRectEx( &windowRect, style, FALSE, exStyle );</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">  HWND hWnd = CreateWindowExA( exStyle, windowClassName, "Demos For Dummies", style, </code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">    0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top,</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">    nullptr, nullptr, windowClass.hInstance, nullptr );</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">  if ( !hWnd )</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">  {</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="window"             data-substep="4"><code class="language-cpp">  }</code></pre>
+  <pre data-step="window"             data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="0"><code class="language-cpp">  //////////////////////////////////////////////////////////////////////////</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  DXGI_SWAP_CHAIN_DESC desc = { 0 };</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  desc.BufferCount = 2;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  desc.BufferDesc.Width = width;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  desc.BufferDesc.Height = height;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  desc.OutputWindow = hWnd;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  desc.SampleDesc.Count = 1;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  desc.Windowed = true;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  ID3D11Device * device = nullptr;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  ID3D11DeviceContext * context = nullptr;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  IDXGISwapChain * swapChain = nullptr;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  if ( D3D11CreateDeviceAndSwapChain( nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &desc, &swapChain, &device, nullptr, &context ) != S_OK )</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="2"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  ID3D11Texture2D * backBuffer = nullptr;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  ID3D11RenderTargetView * backBufferView = nullptr;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  swapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), (void **)&backBuffer );</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  device->CreateRenderTargetView( backBuffer, nullptr, &backBufferView );</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  D3D11_TEXTURE2D_DESC depthDesc = CD3D11_TEXTURE2D_DESC( DXGI_FORMAT_R24G8_TYPELESS, width, height, 1, 1, D3D11_BIND_DEPTH_STENCIL );</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  ID3D11Texture2D * depthStencil = nullptr;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  if ( device->CreateTexture2D( &depthDesc, nullptr, &depthStencil ) != S_OK )</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = CD3D11_DEPTH_STENCIL_VIEW_DESC( D3D11_DSV_DIMENSION_TEXTURE2D, DXGI_FORMAT_D24_UNORM_S8_UINT );</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  ID3D11DepthStencilView * depthStencilView = nullptr;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  if ( device->CreateDepthStencilView( depthStencil, &descDSV, &depthStencilView ) != S_OK )</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">    return false;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="2"><code class="language-cpp">  CD3D11_RASTERIZER_DESC rasterizerDesc = CD3D11_RASTERIZER_DESC( CD3D11_DEFAULT() );</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="2"><code class="language-cpp">  rasterizerDesc.FrontCounterClockwise = true;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="2"><code class="language-cpp">  ID3D11RasterizerState * rasterizerState = nullptr;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="2"><code class="language-cpp">  device->CreateRasterizerState( &rasterizerDesc, &rasterizerState );</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="0"><code class="language-cpp">  //////////////////////////////////////////////////////////////////////////</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="3"><code class="language-cpp">  cgltf_options gltfOptions = { 0 };</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="3"><code class="language-cpp">  cgltf_data * meshData = nullptr;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="3"><code class="language-cpp">  const char * meshFilename = "mesh.glb";</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="3"><code class="language-cpp">  if ( cgltf_parse_file( &gltfOptions, meshFilename, &meshData ) != cgltf_result_success )</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="3"><code class="language-cpp">  if ( cgltf_load_buffers( &gltfOptions, meshData, meshFilename ) != cgltf_result_success )</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  cgltf_primitive & primitive = meshData->meshes[ 0 ].primitives[ 0 ];</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  D3D11_BUFFER_DESC bufferDesc = CD3D11_BUFFER_DESC( (UINT)primitive.attributes[ 0 ].data->buffer_view->size, D3D11_BIND_VERTEX_BUFFER );</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  D3D11_SUBRESOURCE_DATA subData = { 0 };</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  subData.pSysMem = (char *)primitive.attributes[ 0 ].data->buffer_view->buffer->data + primitive.attributes[ 0 ].data->buffer_view->offset;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  ID3D11Buffer * vertexBuffer = nullptr;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  if ( device->CreateBuffer( &bufferDesc, &subData, &vertexBuffer ) != S_OK )</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  D3D11_BUFFER_DESC ibBufferDesc = CD3D11_BUFFER_DESC( (UINT)primitive.indices->buffer_view->size, D3D11_BIND_INDEX_BUFFER );</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  D3D11_SUBRESOURCE_DATA ibSubData = { 0 };</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  ibSubData.pSysMem = (char *)primitive.indices->buffer_view->buffer->data + primitive.indices->buffer_view->offset;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  ID3D11Buffer * indexBuffer = nullptr;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  if ( device->CreateBuffer( &ibBufferDesc, &ibSubData, &indexBuffer ) != S_OK )</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="4"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="0"><code class="language-cpp">  //////////////////////////////////////////////////////////////////////////</code></pre>
+  <pre data-step="graphics-textures"  data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="2"><code class="language-cpp">  int x, y, n;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="2"><code class="language-cpp">  unsigned char * textureData = stbi_load( "texture.png", &x, &y, &n, 4 );</code></pre>
+  <pre data-step="graphics-textures"  data-substep="2"><code class="language-cpp">  if ( !textureData )</code></pre>
+  <pre data-step="graphics-textures"  data-substep="2"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-textures"  data-substep="2"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="2"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-textures"  data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  D3D11_TEXTURE2D_DESC tex2DDesc = CD3D11_TEXTURE2D_DESC( DXGI_FORMAT_R8G8B8A8_UNORM, x, y, 1, 1, D3D11_BIND_SHADER_RESOURCE );</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  D3D11_SUBRESOURCE_DATA texSubData = { 0 };</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  texSubData.pSysMem = textureData;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  texSubData.SysMemPitch = x * 4 * sizeof( char );</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  ID3D11Texture2D * texture = nullptr;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  if ( device->CreateTexture2D( &tex2DDesc, &texSubData, &texture ) != S_OK )</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = CD3D11_SHADER_RESOURCE_VIEW_DESC( D3D11_SRV_DIMENSION_TEXTURE2D, tex2DDesc.Format, 0, 1 );</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  ID3D11ShaderResourceView * textureSRV = nullptr;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  if ( device->CreateShaderResourceView( texture, &srvDesc, &textureSRV ) != S_OK )</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-textures"  data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="2"><code class="language-cpp">  stbi_image_free( textureData );</code></pre>
+  <pre data-step="graphics-textures"  data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="0"><code class="language-cpp">  //////////////////////////////////////////////////////////////////////////</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">  float constantBufferData[ 32 ] = { 0 };</code></pre>
+  <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">  D3D11_BUFFER_DESC constantBufferDesc = CD3D11_BUFFER_DESC( sizeof( constantBufferData ), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE );</code></pre>
+  <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">  D3D11_SUBRESOURCE_DATA constantSubData = { 0 };</code></pre>
+  <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">  constantSubData.pSysMem = constantBufferData;</code></pre>
+  <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">  ID3D11Buffer * constantBuffer = nullptr;</code></pre>
+  <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">  if ( device->CreateBuffer( &constantBufferDesc, &constantSubData, &constantBuffer ) != S_OK )</code></pre>
+  <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">    return false;</code></pre>
+  <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-animation" data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">  char shaderSource[] = R"(</code></pre>
+  <pre data-step="graphics-animation" data-substep="3"><code class="language-cpp">    cbuffer c</code></pre>
+  <pre data-step="graphics-animation" data-substep="3"><code class="language-cpp">    {;</code></pre>
+  <pre data-step="graphics-animation" data-substep="3"><code class="language-cpp">      float4x4 projectionMatrix;</code></pre>
+  <pre data-step="graphics-animation" data-substep="3"><code class="language-cpp">      float4x4 worldMatrix;</code></pre>
+  <pre data-step="graphics-animation" data-substep="3"><code class="language-cpp">    };</code></pre>
+  <pre data-step="graphics-animation" data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">    struct VS_INPUT</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">    {</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">      float3 Pos : POSITION;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">    };</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">    struct VS_OUTPUT</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">    {</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">      float4 Pos : SV_POSITION;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="4"><code class="language-cpp">      float2 TexCoord : TEXCOORD0;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">    };</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">    VS_OUTPUT vs_main( VS_INPUT In )</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">    {</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">      VS_OUTPUT Out;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">      Out.Pos = float4( In.Pos, 1.0 );</code></pre>
+  <pre data-step="graphics-animation" data-substep="3"><code class="language-cpp">      Out.Pos = mul(worldMatrix, Out.Pos);</code></pre>
+  <pre data-step="graphics-animation" data-substep="3"><code class="language-cpp">      Out.Pos = mul(projectionMatrix, Out.Pos);</code></pre>
+  <pre data-step="graphics-textures"  data-substep="4"><code class="language-cpp">      Out.TexCoord = In.Pos.xy + In.Pos.z;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">      return Out;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">    }</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp"> &nbsp;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="4"><code class="language-cpp">    Texture2D tex;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="4"><code class="language-cpp">    SamplerState smp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">    float4 ps_main( VS_OUTPUT In ) : SV_TARGET</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">    {</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">      float4 c = 1;</code></pre>
+  <pre data-step="graphics-textures"  data-substep="4"><code class="language-cpp">      c = tex.Sample( smp, In.TexCoord );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">      return c;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">    }</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">  )";</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  ID3DBlob * vertexShaderBlob = nullptr;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  if ( D3DCompile( shaderSource, strlen( shaderSource ), nullptr, nullptr, nullptr, "vs_main", "vs_5_0", 0, 0, &vertexShaderBlob, nullptr ) != S_OK )</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  ID3D11VertexShader * vertexShader = nullptr;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  if ( device->CreateVertexShader( vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), nullptr, &vertexShader ) != S_OK )</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  ID3DBlob * pixelShaderBlob = nullptr;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  if ( D3DCompile( shaderSource, strlen( shaderSource ), nullptr, nullptr, nullptr, "ps_main", "ps_5_0", 0, 0, &pixelShaderBlob, nullptr ) != S_OK )</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  ID3D11PixelShader * pixelShader = nullptr;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  if ( device->CreatePixelShader( pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader ) != S_OK )</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="4"><code class="language-cpp">  static D3D11_INPUT_ELEMENT_DESC inputDesc[] =</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="4"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="4"><code class="language-cpp">    {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="4"><code class="language-cpp">  };</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="4"><code class="language-cpp">  ID3D11InputLayout * inputLayout = nullptr;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="4"><code class="language-cpp">  if ( device->CreateInputLayout( inputDesc, 1, vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &inputLayout ) != S_OK )</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="4"><code class="language-cpp">  {</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="4"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="4"><code class="language-cpp">  }</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="audio"              data-substep="0"><code class="language-cpp">  //////////////////////////////////////////////////////////////////////////</code></pre>
+  <pre data-step="audio"              data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">  ma_engine engine;</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">  if ( ma_engine_init( nullptr, &engine ) != MA_SUCCESS )</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">  {</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">  }</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">  ma_sound sound;</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">  if ( ma_sound_init_from_file( &engine, "audio.mp3", 0, nullptr, nullptr, &sound ) != MA_SUCCESS )</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">  {</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">  }</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="audio"              data-substep="2"><code class="language-cpp">  ma_sound_start( &sound );</code></pre>
+  <pre data-step="audio"              data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="window"             data-substep="0"><code class="language-cpp">  //////////////////////////////////////////////////////////////////////////</code></pre>
+  <pre data-step="window"             data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="window"             data-substep="5"><code class="language-cpp">  while ( !gWindowWantsToQuit )</code></pre>
+  <pre data-step="window"             data-substep="5"><code class="language-cpp">  {</code></pre>
+  <pre data-step="window"             data-substep="5"><code class="language-cpp">    MSG msg;</code></pre>
+  <pre data-step="window"             data-substep="5"><code class="language-cpp">    if ( PeekMessage( &msg, hWnd, 0U, 0U, PM_REMOVE ) )</code></pre>
+  <pre data-step="window"             data-substep="5"><code class="language-cpp">    {</code></pre>
+  <pre data-step="window"             data-substep="5"><code class="language-cpp">      TranslateMessage( &msg );</code></pre>
+  <pre data-step="window"             data-substep="5"><code class="language-cpp">      DispatchMessage( &msg );</code></pre>
+  <pre data-step="window"             data-substep="5"><code class="language-cpp">    }</code></pre>
+  <pre data-step="audio"              data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="audio"              data-substep="3"><code class="language-cpp">    float cursor = 0.0f;</code></pre>
+  <pre data-step="audio"              data-substep="3"><code class="language-cpp">    ma_sound_get_cursor_in_seconds( &sound, &cursor );</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="4"><code class="language-cpp">    const float clearColor[ 4 ] = { 0.1f, 0.2f, 0.3f, 0.0f };</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="4"><code class="language-cpp">    context->ClearRenderTargetView( backBufferView, clearColor );</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="4"><code class="language-cpp">    context->ClearDepthStencilView( depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0 );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="0"><code class="language-cpp">    //////////////////////////////////////////////////////////////////////////</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-animation" data-substep="4"><code class="language-cpp">    // INSERT DEMO HERE</code></pre>
+  <pre data-step="graphics-animation" data-substep="4"><code class="language-cpp">    mat4x4 & projectionMatrix = *(mat4x4 *)&constantBufferData[ 0 ];</code></pre>
+  <pre data-step="graphics-animation" data-substep="4"><code class="language-cpp">    mat4x4Perspective( projectionMatrix, 3.1415f * 0.25f, width / (float)height, 0.01f, 10.0f );</code></pre>
+  <pre data-step="graphics-animation" data-substep="4"><code class="language-cpp">&nbsp;</code></pre>    
+  <pre data-step="graphics-animation" data-substep="4"><code class="language-cpp">    mat4x4 & worldMatrix = *(mat4x4 *)&constantBufferData[ 16 ];</code></pre>
+  <pre data-step="graphics-animation" data-substep="4"><code class="language-cpp">    mat4x4Identity( worldMatrix );</code></pre>
+  <pre data-step="graphics-animation" data-substep="4"><code class="language-cpp">    mat4x4RotateY( worldMatrix, cursor );</code></pre>
+  <pre data-step="graphics-animation" data-substep="4"><code class="language-cpp">    const vec3 translation = { 0.0f, 0.0f, -5.0f };</code></pre>
+  <pre data-step="graphics-animation" data-substep="4"><code class="language-cpp">    mat4x4Translate( worldMatrix, translation );</code></pre>
+  <pre data-step="graphics-animation" data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-animation" data-substep="0"><code class="language-cpp">    //////////////////////////////////////////////////////////////////////////</code></pre>
+  <pre data-step="graphics-animation" data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-animation" data-substep="5"><code class="language-cpp">    D3D11_MAPPED_SUBRESOURCE mappedSubRes;</code></pre>
+  <pre data-step="graphics-animation" data-substep="5"><code class="language-cpp">    context->Map( constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubRes );</code></pre>
+  <pre data-step="graphics-animation" data-substep="5"><code class="language-cpp">    CopyMemory( mappedSubRes.pData, constantBufferData, constantBufferDesc.ByteWidth );</code></pre>
+  <pre data-step="graphics-animation" data-substep="5"><code class="language-cpp">    context->Unmap( constantBuffer, 0 );</code></pre>
+  <pre data-step="graphics-animation" data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    const D3D11_VIEWPORT viewport = CD3D11_VIEWPORT( 0.0f, 0.0f, (float)width, (float)height );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    context->RSSetViewports( 1, &viewport );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    context->OMSetRenderTargets( 1, &backBufferView, depthStencilView );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-animation" data-substep="5"><code class="language-cpp">    context->VSSetConstantBuffers( 0, 1, &constantBuffer );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    context->VSSetShader( vertexShader, nullptr, 0 );</code></pre>
+  <pre data-step="graphics-textures"  data-substep="5"><code class="language-cpp">    context->PSSetShaderResources( 0, 1, &textureSRV );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    context->PSSetShader( pixelShader, nullptr, 0 );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    context->RSSetState( rasterizerState );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    context->IASetInputLayout( inputLayout );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    ID3D11Buffer * buffers[] = { vertexBuffer };</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    const UINT stride[] = { (UINT)primitive.attributes[ 0 ].data->stride };</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    const UINT offset[] = { 0 };</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    context->IASetVertexBuffers( 0, 1, buffers, stride, offset );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    context->IASetIndexBuffer( indexBuffer, primitive.indices->component_type == cgltf_component_type_r_32u ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT, 0 );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    context->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="5"><code class="language-cpp">    context->DrawIndexed( (UINT)primitive.indices->count, 0, 0 );</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="0"><code class="language-cpp">    //////////////////////////////////////////////////////////////////////////</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="5"><code class="language-cpp">    swapChain->Present( 0, 0 );</code></pre>
+  <pre data-step="window"             data-substep="5"><code class="language-cpp">  }</code></pre>
+  <pre data-step="audio"              data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="audio"              data-substep="4"><code class="language-cpp">  ma_sound_stop( &sound );</code></pre>
+  <pre data-step="audio"              data-substep="4"><code class="language-cpp">  ma_engine_stop( &engine );</code></pre>
+  <pre data-step="audio"              data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="5"><code class="language-cpp">  rasterizerState->Release();</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="6"><code class="language-cpp">  depthStencilView->Release();</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="6"><code class="language-cpp">  depthStencil->Release();</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="6"><code class="language-cpp">  backBufferView->Release();</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="6"><code class="language-cpp">  backBuffer->Release();</code></pre>
+  <pre data-step="graphics-textures"  data-substep="6"><code class="language-cpp">  textureSRV->Release();</code></pre>
+  <pre data-step="graphics-textures"  data-substep="6"><code class="language-cpp">  texture->Release();</code></pre>
+  <pre data-step="graphics-animation" data-substep="6"><code class="language-cpp">  constantBuffer->Release();</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="6"><code class="language-cpp">  pixelShader->Release();</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="6"><code class="language-cpp">  vertexShader->Release();</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="5"><code class="language-cpp">  vertexBuffer->Release();</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="5"><code class="language-cpp">  indexBuffer->Release();</code></pre>
+  <pre data-step="graphics-shaders"   data-substep="6"><code class="language-cpp">  inputLayout->Release();</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="5"><code class="language-cpp">  cgltf_free( meshData );</code></pre>
+  <pre data-step="graphics-meshload"  data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="6"><code class="language-cpp">  context->Release();</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="6"><code class="language-cpp">  device->Release();</code></pre>
+  <pre data-step="window"             data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="window"             data-substep="6"><code class="language-cpp">  DestroyWindow( hWnd );</code></pre>
+  <pre data-step="window"             data-substep="6"><code class="language-cpp">  UnregisterClassA( windowClassName, GetModuleHandle( nullptr ) );</code></pre>
+  <pre data-step="window"             data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="stub"               data-substep="0"><code class="language-cpp">  return 0;</code></pre>
+  <pre data-step="stub"               data-substep="0"><code class="language-cpp">}</code></pre>
+</aside>
+
+</html>
