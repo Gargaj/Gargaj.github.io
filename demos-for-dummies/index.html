@@ -267,6 +267,14 @@
     {
       next();
     }
+    window.onhashchange = function()
+    {
+      if (location.hash.length > 1)
+      {
+        var parts = location.hash.substring(1).split("/");
+        highlight(parts[0], parts[1]);
+      }
+    }
   };
   </script>
 </head>
