@@ -967,7 +967,7 @@
   <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  ID3D11DepthStencilView * depthStencilView = nullptr;</code></pre>
   <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  if ( device->CreateDepthStencilView( depthStencil, &descDSV, &depthStencilView ) != S_OK )</code></pre>
   <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  {</code></pre>
-  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">    return false;</code></pre>
+  <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">    return 1;</code></pre>
   <pre data-step="graphics-dxinit"    data-substep="3"><code class="language-cpp">  }</code></pre>
   <pre data-step="graphics-dxinit"    data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
   <pre data-step="graphics-meshload"  data-substep="2"><code class="language-cpp">  CD3D11_RASTERIZER_DESC rasterizerDesc = CD3D11_RASTERIZER_DESC( CD3D11_DEFAULT() );</code></pre>
@@ -1046,7 +1046,7 @@
   <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">  ID3D11Buffer * constantBuffer = nullptr;</code></pre>
   <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">  if ( device->CreateBuffer( &constantBufferDesc, &constantSubData, &constantBuffer ) != S_OK )</code></pre>
   <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">  {</code></pre>
-  <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">    return false;</code></pre>
+  <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">    return 1;</code></pre>
   <pre data-step="graphics-animation" data-substep="2"><code class="language-cpp">  }</code></pre>
   <pre data-step="graphics-animation" data-substep="0"><code class="language-cpp">&nbsp;</code></pre>
   <pre data-step="graphics-shaders"   data-substep="2"><code class="language-cpp">  char shaderSource[] = R"(</code></pre>
