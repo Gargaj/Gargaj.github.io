@@ -297,8 +297,8 @@
     </p>
     <ol>
       <li>At the time of writing, it is clocking at 3.92MB, which for a single
-      header file is a bit ridiculous, and I'm not sure it qualifies for the
-      prefix "mini-" anymore.</li>
+      header file is a bit ridiculous, so I'm not sure it qualifies for the
+      prefix "mini-" anymore, and most of it is stuff you'll never need.</li>
       <li>In terms of sycnhronization, it has a pretty bad clock resolution problem,
       so in effect you'd be limited to about 100 fps - not <i>too</i> bad,
       but certainly not ideal.</li>
@@ -330,9 +330,9 @@
     <section data-substep="1">
       <p>
         We include <code>mmdeviceapi.h</code> which is where WASAPI lives;
-        we only <code>conio.h</code> for <code>_kbhit()</code> to quit on keypress
-        just for the sake of this example - you will probably replace that with
-        your own demo mainloop.
+        we only need <code>conio.h</code> for <code>_kbhit()</code> to quit on keypress
+        just for the sake of this example - you will probably replace that later
+        with your own demo's mainloop.
       </p>
     </section>
     <section data-substep="2">
@@ -359,7 +359,7 @@
       </p>
       <p>
         First we initialize the <a href="https://en.wikipedia.org/wiki/Component_Object_Model">COM interface</a>;
-        you can read more about <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms680573(v=vs.85).aspx">here</a> this later.
+        you can read more about it <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms680573(v=vs.85).aspx">here</a> this later.
       </p>
       <p>
         Next, we create an instance of <code>MMDeviceEnumerator</code> using the
@@ -422,9 +422,9 @@
       </p>
       <p>
         One sidenote worth making is that since most audio operations tend
-        to be in floating point, we can specify our audio to be in 32-bit
-        floats instead of 16-bit shorts, but it's also worth mentioning some
-        poorly made audio devices may not support this.
+        to be in floating point, you can also specify your audio to be in 32-bit
+        floats instead of 16-bit shorts and skip the conversion step - this is
+        up to you and what 
       </p>
     </section>
     <section data-substep="4">
@@ -491,9 +491,13 @@
         Because we don't want audio to interrupt, we prefer putting our thread
         to have the highest possible priority.
       </p>
+    </section>
+    <section data-substep="4">
       <p>
-        And this is it - since threads exit by themselves, we don't need any sort
-        of cleanup.
+        And we clean up.
+      </p>
+      <p>
+        Next, let's fill up the thread.
       </p>
     </section>
   </article>
@@ -601,8 +605,25 @@
     </section>
     <section data-substep="3">
       <p>
-        And then we add the rendering to the thread - but first we need to
-        understand how modern audio works:
+        This function will serve as the buffer filler; it requests a number of
+        frames from the render client buffer, decodes our music into it (we'll
+        do that later), and then sends it back to the render client.
+      </p>
+      <p>
+        We'll use a separate function here because we're going to use it in two
+        places.
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        First, before we play the buffer, we fill it in full so that we're not
+        playing an empty buffer.
+      </p>
+    </section>
+    <section data-substep="5">
+      <p>
+        And then, after playing, we start rendering to the thread - but first
+        we need to understand how modern audio works:
       </p>
       <p>
         Audio buffers are <a href="https://en.wikipedia.org/wiki/Circular_buffer">ring buffers</a>
@@ -632,9 +653,8 @@
           how much the cursor effectively advanced.
         </li>
         <li>
-          If this value is non-zero, we can request that amount of frames from
-          the buffer, we fill it (later) and then tell the render client that
-          we're done.
+          If this value is non-zero, we then fill the buffer for the appropriate
+          amount of frames.
         </li>
       </ol>
       <p>
@@ -643,7 +663,7 @@
         themselves suggest doing it</a>.
       </p>
     </section>
-    <section data-substep="4">
+    <section data-substep="6">
       <p>
         And of course we clean up the render client as well.
       </p>
@@ -791,9 +811,21 @@
   <pre data-step="thread-logic"       data-substep="1"><code class="language-cpp">bool inThread = false;</code></pre>
   <pre data-step="mp3"                data-substep="2"><code class="language-cpp">&nbsp;</code></pre>
   <pre data-step="mp3"                data-substep="2"><code class="language-cpp">drmp3 mp3;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">void FillBuffer( unsigned int _frameCount )</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">{</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">  unsigned char * buffer = nullptr;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">  audioRenderClient->GetBuffer( _frameCount, &buffer );</code></pre>
+  <pre data-step="mp3"                data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="mp3"                data-substep="4"><code class="language-cpp">  drmp3_read_pcm_frames_s16( &mp3, _frameCount, (drmp3_int16 *)buffer );</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">  audioRenderClient->ReleaseBuffer( _frameCount, 0 );</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">}</code></pre>
   <pre data-step="thread-init"        data-substep="1"><code class="language-cpp">&nbsp;</code></pre>
   <pre data-step="thread-init"        data-substep="1"><code class="language-cpp">DWORD __stdcall ThreadProc( LPVOID _param )</code></pre>
   <pre data-step="thread-init"        data-substep="1"><code class="language-cpp">{</code></pre>
+  <pre data-step="wasapi-render"      data-substep="4"><code class="language-cpp">  FillBuffer( bufferFrameCount );</code></pre>
+  <pre data-step="wasapi-render"      data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
   <pre data-step="thread-logic"       data-substep="2"><code class="language-cpp">  if ( audioClient->Start() != S_OK )</code></pre>
   <pre data-step="thread-logic"       data-substep="2"><code class="language-cpp">  {</code></pre>
   <pre data-step="thread-logic"       data-substep="2"><code class="language-cpp">    return 0;</code></pre>
@@ -803,20 +835,15 @@
   <pre data-step="thread-logic"       data-substep="3"><code class="language-cpp">  inThread = true;</code></pre>
   <pre data-step="thread-logic"       data-substep="3"><code class="language-cpp">  while ( !shouldExit )</code></pre>
   <pre data-step="thread-logic"       data-substep="3"><code class="language-cpp">  {</code></pre>
-  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">    unsigned int numFramesPadding = 0;</code></pre>
-  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">    audioClient->GetCurrentPadding( &numFramesPadding );</code></pre>
-  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
-  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">    const unsigned int framesRemaining = bufferFrameCount - numFramesPadding;</code></pre>
-  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">    if ( framesRemaining )</code></pre>
-  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">    {</code></pre>
-  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">      unsigned char * buffer = nullptr;</code></pre>
-  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">      audioRenderClient->GetBuffer( framesRemaining, &buffer );</code></pre>
-  <pre data-step="mp3"                data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
-  <pre data-step="mp3"                data-substep="4"><code class="language-cpp">      drmp3_read_pcm_frames_s16( &mp3, framesRemaining, (drmp3_int16 *)buffer );</code></pre>
-  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
-  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">      audioRenderClient->ReleaseBuffer( framesRemaining, 0 );</code></pre>
-  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">    }</code></pre>
-  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="5"><code class="language-cpp">    unsigned int numFramesPadding = 0;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="5"><code class="language-cpp">    audioClient->GetCurrentPadding( &numFramesPadding );</code></pre>
+  <pre data-step="wasapi-render"      data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="5"><code class="language-cpp">    const unsigned int framesRemaining = bufferFrameCount - numFramesPadding;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="5"><code class="language-cpp">    if ( framesRemaining )</code></pre>
+  <pre data-step="wasapi-render"      data-substep="5"><code class="language-cpp">    {</code></pre>
+  <pre data-step="wasapi-render"      data-substep="5"><code class="language-cpp">      FillBuffer( framesRemaining );</code></pre>
+  <pre data-step="wasapi-render"      data-substep="5"><code class="language-cpp">    }</code></pre>
+  <pre data-step="wasapi-render"      data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
   <pre data-step="thread-logic"       data-substep="3"><code class="language-cpp">    Sleep( 3 );</code></pre>
   <pre data-step="thread-logic"       data-substep="3"><code class="language-cpp">  }</code></pre>
   <pre data-step="thread-logic"       data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
@@ -908,33 +935,15 @@
   <pre data-step="thread-logic"       data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
   <pre data-step="thread-logic"       data-substep="5"><code class="language-cpp">  while ( inThread ) Sleep( 3 );</code></pre>
   <pre data-step="thread-logic"       data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="thread-init"        data-substep="4"><code class="language-cpp">  CloseHandle( threadHandle );</code></pre>
+  <pre data-step="thread-init"        data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
   <pre data-step="mp3"                data-substep="5"><code class="language-cpp">  drmp3_uninit( &mp3 );</code></pre>
   <pre data-step="mp3"                data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
-  <pre data-step="wasapi-clock"       data-substep="5"><code class="language-cpp">  if ( audioClock )</code></pre>
-  <pre data-step="wasapi-clock"       data-substep="5"><code class="language-cpp">  {</code></pre>
-  <pre data-step="wasapi-clock"       data-substep="5"><code class="language-cpp">    audioClock->Release();</code></pre>
-  <pre data-step="wasapi-clock"       data-substep="5"><code class="language-cpp">    audioClock = nullptr;</code></pre>
-  <pre data-step="wasapi-clock"       data-substep="5"><code class="language-cpp">  }</code></pre>
-  <pre data-step="wasapi-render"      data-substep="4"><code class="language-cpp">  if ( audioRenderClient )</code></pre>
-  <pre data-step="wasapi-render"      data-substep="4"><code class="language-cpp">  {</code></pre>
-  <pre data-step="wasapi-render"      data-substep="4"><code class="language-cpp">    audioRenderClient->Release();</code></pre>
-  <pre data-step="wasapi-render"      data-substep="4"><code class="language-cpp">    audioRenderClient = nullptr;</code></pre>
-  <pre data-step="wasapi-render"      data-substep="4"><code class="language-cpp">  }</code></pre>
-  <pre data-step="wasapi-client"      data-substep="5"><code class="language-cpp">  if ( audioClient )</code></pre>
-  <pre data-step="wasapi-client"      data-substep="5"><code class="language-cpp">  {</code></pre>
-  <pre data-step="wasapi-client"      data-substep="5"><code class="language-cpp">    audioClient->Release();</code></pre>
-  <pre data-step="wasapi-client"      data-substep="5"><code class="language-cpp">    audioClient = nullptr;</code></pre>
-  <pre data-step="wasapi-client"      data-substep="5"><code class="language-cpp">  }</code></pre>
-  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  if ( device )</code></pre>
-  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  {</code></pre>
-  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">    device->Release();</code></pre>
-  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">    device = nullptr;</code></pre>
-  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  }</code></pre>
-  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  if ( enumerator )</code></pre>
-  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  {</code></pre>
-  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">    enumerator->Release();</code></pre>
-  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">    enumerator = nullptr;</code></pre>
-  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="5"><code class="language-cpp">  audioClock->Release();</code></pre>
+  <pre data-step="wasapi-render"      data-substep="6"><code class="language-cpp">  audioRenderClient->Release();</code></pre>
+  <pre data-step="wasapi-client"      data-substep="5"><code class="language-cpp">  audioClient->Release();</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  device->Release();</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  enumerator->Release();</code></pre>
   <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
   <pre data-step="stub"               data-substep="1"><code class="language-cpp">  return 0;</code></pre>
   <pre data-step="stub"               data-substep="1"><code class="language-cpp">}</code></pre>
