@@ -877,7 +877,7 @@
   <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  }</code></pre>
   <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
   <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  const REFERENCE_TIME bufferDuration = 10000000; // 100 nanosecond units</code></pre>
-  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  if ( audioClient->Initialize( AUDCLNT_SHAREMODE_SHARED, 0, bufferDuration, 0, &waveFormat, 0 ) != S_OK )</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  if ( audioClient->Initialize( AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM | AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY, bufferDuration, 0, &waveFormat, 0 ) != S_OK )</code></pre>
   <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  {</code></pre>
   <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">    return 1;</code></pre>
   <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  }</code></pre>
