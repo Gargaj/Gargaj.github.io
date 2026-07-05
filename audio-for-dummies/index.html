@@ -1,0 +1,944 @@
+<!doctype html>
+<html>
+<head>
+  <title>Audio For Dummies</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap');
+
+    *
+    {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body
+    {
+      background: #3B3E3D;
+      color: #eee;
+      font-family: "Roboto", sans-serif;
+    }
+    main
+    {
+      width: 50vw;
+    }
+    h1
+    {
+      margin: 30px 20px;
+    }
+    main article
+    {
+      margin-bottom: 30px;
+    }
+    main article h2
+    {
+      margin: 20px;
+    }
+    main article p
+    {
+      line-height: 1.4em;
+      margin: 0.5em 0;
+    }
+    main article > p
+    {
+      margin-left: 20px;
+      margin-right: 40px;
+    }
+    main article li
+    {
+      margin-left: 40px;
+      margin-right: 40px;
+    }
+    p code 
+    {
+      display: inline-block;
+      background: #2d3130;
+      padding: 0px 6px;
+      font-family: "Source Code Pro", monospace;
+    }
+    main article section
+    {
+      margin: 20px;
+      margin-right: 30px;
+      padding: 10px 20px;
+      background: #424645;
+    }
+    main article section.current 
+    {
+      background: #624646;
+    }
+    main article section ol
+    {
+      margin: 20px;
+    }
+    main article section li
+    {
+      line-height: 1.5em;
+    }
+    main article section[data-substep]
+    {
+      cursor: pointer;
+    }
+    aside#code
+    {
+      background: #282C34;
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 50vw;
+      height: 100vh;
+      padding: 20px 0;
+      overflow-y: scroll;
+      scroll-behavior: smooth;
+    }
+    aside#code pre, aside#code pre code
+    {
+      margin: 0;
+      white-space: break-spaces;
+      font-family: "Source Code Pro", monospace;
+      font-size: 12px;
+    }
+    aside#code pre.step-highlight
+    {
+      background: #3c3f48;
+    }
+    aside#code pre.highlight
+    {
+      background: #624646;
+    }
+    .hljs
+    {
+      background: none;
+    }
+    pre code.hljs
+    {
+      padding: 0 20px;
+    }
+    a
+    {
+      color: #ccc;
+    }
+    button#next 
+    {
+      margin: 20px auto;
+      display: block;
+      font-size: 32px;
+      background: none;
+      border: none;
+      color: #54575B;
+      cursor: pointer;
+      width: 200px;
+      border-radius: 20px;
+      transition: 300ms ease all;
+    }
+    button#next:hover
+    {
+      background: #424446;
+      color: #6B6F75;
+    }
+    </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>
+  var steps = [];
+  function highlight(highlightedStep, highlightedSubstep)
+  {
+    var lines = [];
+    var highlightedStepIdx = steps.indexOf(highlightedStep);
+    [...document.querySelectorAll("#code pre")].forEach((i)=>{
+      var stepIdx = steps.indexOf(i.getAttribute("data-step"));
+      var substepIdx = i.getAttribute("data-substep");
+      i.classList.remove("step-highlight");
+      i.classList.remove("highlight");
+      if (stepIdx == highlightedStepIdx && stepIdx != -1)
+      {
+        if (substepIdx == highlightedSubstep)
+        {
+          lines.push(i);
+        }
+        i.classList.add(substepIdx == highlightedSubstep ? "highlight" : "step-highlight");
+        i.style.display = "block";
+      }
+      else if(stepIdx < highlightedStepIdx && stepIdx != -1)
+      {
+        i.style.display = "block";
+      }
+      else
+      {
+        i.style.display = "none";
+      }
+    });
+    for(var i=0; i<=currentSubStepIdx; i++)
+    {
+      [...document.querySelectorAll("main article section")].forEach(i=>{ i.classList.remove("current"); } );
+    }
+    var stepElement = document.querySelector("main article[data-step=\""+steps[highlightedStepIdx]+"\"] section[data-substep=\""+highlightedSubstep+"\"]");
+    if (stepElement)
+    {
+      stepElement.classList.add("current");
+      setTimeout(function(){ stepElement.scrollIntoView(); }, 10);
+    }
+    
+    location.hash = highlightedStep + "/" + highlightedSubstep;
+    if (lines.length)
+    {
+      lines[Math.floor(lines.length/2)].scrollIntoView({"block":"center"});
+    }
+  }
+  function isElementInViewport (el)
+  {
+    var rect = el.getBoundingClientRect();
+
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+  }
+  function moveTo(stepIdx,substepIdx)
+  {
+    currentStepIdx = stepIdx;
+    currentSubStepIdx = substepIdx;
+    for(var i=0; i<=currentStepIdx; i++)
+    {
+      [...document.querySelectorAll("main article[data-step=\""+steps[i]+"\"]")].forEach(i=>i.style.display="block");
+      if (i < currentStepIdx)
+      {
+        [...document.querySelectorAll("main article[data-step=\""+steps[i]+"\"] section")].forEach(i=>i.style.display="block");
+      }
+    }
+    for(var i=0; i<=currentSubStepIdx; i++)
+    {
+      [...document.querySelectorAll("main article[data-step=\""+steps[stepIdx]+"\"] section[data-substep=\""+i+"\"]")].forEach(i=>{ i.style.display="block"; i.classList.remove("current"); } );
+    }
+    highlight(steps[stepIdx],substepIdx);
+    document.querySelector("main article[data-step=\""+steps[stepIdx]+"\"] section[data-substep=\""+substepIdx+"\"]")?.classList.add("current");
+    document.getElementById("next").scrollIntoView();
+    document.getElementById("next").style.display = stepIdx >= steps.length - 1 ? "none" : "block";
+  }
+  var currentStepIdx = -1;
+  var currentSubStepIdx = 0;
+  function next()
+  {
+    var maxSubStep = 0;
+    if (currentStepIdx >= 0)
+    {
+      [...document.querySelector("main article[data-step=\""+steps[currentStepIdx]+"\"]").querySelectorAll("section[data-substep]")].forEach(i=>{
+        maxSubStep = Math.max(maxSubStep, i.getAttribute("data-substep"));
+      });
+    }
+    if (currentSubStepIdx >= maxSubStep)
+    {
+      currentStepIdx++;
+      currentSubStepIdx = 1;
+    }
+    else
+    {
+      currentSubStepIdx++;
+    }
+    moveTo(currentStepIdx, currentSubStepIdx);
+  }
+  window.onload = function()
+  {
+    [...document.querySelectorAll("main article")].map((i)=>{
+      var step = i.getAttribute("data-step");
+      if (!step)
+      {
+        return;
+      }
+      i.style.display = "none";
+      steps.push(step);
+    });
+    [...document.querySelectorAll("main article section")].map((i)=>{
+      var substep = i.getAttribute("data-substep");
+      var step = i.parentNode.getAttribute("data-step");
+      i.style.display = "none";
+      i.onclick = function(e)
+      {
+        highlight(step, substep);
+      }
+    });
+    document.getElementById("next").onclick = function(e)
+    {
+      next();
+    }
+    hljs.highlightAll();
+    if (location.hash.length > 1)
+    {
+      var parts = location.hash.substring(1).split("/");
+      moveTo(steps.indexOf(parts[0]), parts[1]);
+    }
+    else
+    {
+      next();
+    }
+    window.onhashchange = function()
+    {
+      if (location.hash.length > 1)
+      {
+        var parts = location.hash.substring(1).split("/");
+        highlight(parts[0], parts[1]);
+      }
+    }
+  };
+  </script>
+</head>
+<main>
+  <h1>How to start writing a music replayer for your demo in &lt;200 lines</h1>
+  
+  <article data-step="intro">
+    <p>
+      Okay, so we're back again after the <a href="https://gargaj.github.io/demos-for-dummies/">previous
+      tutorial</a> that showed us how to build a basic 3D renderer.
+    </p>
+    <p>
+      After I published that one, I've come to recognize two problems with
+      Miniaudio, the library I've been using in that tutorial:
+    </p>
+    <ol>
+      <li>At the time of writing, it is clocking at 3.92MB, which for a single
+      header file is a bit ridiculous, and I'm not sure it qualifies for the
+      prefix "mini-" anymore.</li>
+      <li>In terms of sycnhronization, it has a pretty bad clock resolution problem,
+      so in effect you'd be limited to about 100 fps - not <i>too</i> bad,
+      but certainly not ideal.</li>
+    </ol>
+    <p>
+      So let's fix that, and write our own basic music player from scratch;
+      we're going to be using <a href="https://learn.microsoft.com/en-us/windows/win32/coreaudio/wasapi">WASAPI</a> 
+      as our audio backend, solely because it's shockingly simple and at this 
+      point DirectSound is just a wrapper on top of it anyway.
+    </p>
+  </article>
+  
+  <article data-step="stub">
+    <h2>The basics</h2>
+    <section data-substep="1">
+      <p>
+        Again, if you're having problems with this, off to
+        <a href="https://www.codecademy.com/resources/docs/cpp">Codecademy</a> 
+        with you.
+      </p>
+    </section>
+  </article>
+  
+  <article data-step="wasapi-init">
+    <h2>Initializing WASAPI</h2>
+    <p>
+      First off, we need to initialize our audio device.
+    </p>
+    <section data-substep="1">
+      <p>
+        We include <code>mmdeviceapi.h</code> which is where WASAPI lives;
+        we only <code>conio.h</code> for <code>_kbhit()</code> to quit on keypress
+        just for the sake of this example - you will probably replace that with
+        your own demo mainloop.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        First off, we'll need a device enumerator, and the device itself;
+        the enumerator is basically a manager object that takes care of all
+        the audio devices in the system.
+      </p>
+      <p>
+        Why? Because remember: nowadays, your headphones,
+        your VR helmet, your phone, your video game controller, they all have
+        speakers and microphones, and usually act as separate audio devices,
+        so you'll need some sort of selection system to send the audio through
+        the correct one.
+      </p>
+      <p>
+        We also need to keep track of how big our buffer is - we'll get back
+        to that later.
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        This is the basic initialization flow:
+      </p>
+      <p>
+        First we initialize the <a href="https://en.wikipedia.org/wiki/Component_Object_Model">COM interface</a>;
+        you can read more about <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms680573(v=vs.85).aspx">here</a> this later.
+      </p>
+      <p>
+        Next, we create an instance of <code>MMDeviceEnumerator</code> using the
+        class <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a>,
+        and then use that instance to create our audio device; there are a number
+        of parameters to <a href="https://learn.microsoft.com/en-us/windows/win32/api/mmdeviceapi/nf-mmdeviceapi-immdeviceenumerator-getdefaultaudioendpoint"><code>GetDefaultAudioEndpoint</code></a> 
+        that you can read all about later.
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        We also create a basic mainloop that just busywaits - our music will be
+        playing in the background of whatever we're doing, so for this example
+        we don't need to do anything here (yet).
+      </p>
+    </section>
+    <section data-substep="5">
+      <p>
+        And then we clean up, because we're civilized people.
+      </p>
+      <p>
+        Right now, this doesn't do much, but as long as we can run this without
+        an error we're on the right track.
+      </p>
+    </section>
+  </article>
+  
+  <article data-step="wasapi-client">
+    <h2>Creating an audio client</h2>
+    <p>
+      The next step is creating what WASAPI calls an "audio client"; this is
+      effectively what the operating system considers the interface between
+      itself and an application that plays audio.
+    </p>
+    <section data-substep="1">
+      <p>
+        First we include the header.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        This will be the instance of our audio client.
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        When we create the audio client, we will need to specify the format 
+        of audio we're sending out; typically even now in 2026, the most common
+        format is what's usually referred to is "CD quality" audio - 
+        <a href="https://en.wikipedia.org/wiki/44,100_Hz">44100Hz</a>, 16-bit,
+        stereo - so we set ourselves up accordingly.
+      </p>
+      <p>
+        Of particular importance is the <code>WAVEFORMATEX</code> struct;
+        this is a very common struct when dealing with audio in Windows,
+        so much so that it's used in the header of a <a href="https://en.wikipedia.org/wiki/WAV">.WAV</a> 
+        file to describe its contents. You can read all about the details
+        of how to fill this struct out
+        <a href="https://learn.microsoft.com/en-us/windows/win32/api/mmeapi/ns-mmeapi-waveformatex">here</a>.
+      </p>
+      <p>
+        One sidenote worth making is that since most audio operations tend
+        to be in floating point, we can specify our audio to be in 32-bit
+        floats instead of 16-bit shorts, but it's also worth mentioning some
+        poorly made audio devices may not support this.
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        Then we create our client object, and initialize it.
+      </p>
+      <p>
+        One interesting note is the <code>bufferDuration</code> variable:
+        the <code>REFERENCE_TIME</code> type in Windows is
+        <a href="https://learn.microsoft.com/en-us/windows/win32/directshow/reference-time">defined</a>
+        as a unit that counts in 100-<a href="https://en.wikipedia.org/wiki/Nanosecond">nanosecond</a> increments. This means that 10
+        such units will constitute as one microsecond, so 10 * 1000 * 1000 units
+        will constitute a second. Thus, specifying this value will give us a second long buffer.
+      </p>
+      <p>
+        We also query the buffer size we got; however, note that the value returned here
+        is <i>in frames</i>; a frame is generally what we call any number of audio
+        samples that are played simultaneously, so a stereo 16-bit 44100 Hz signal will have 44100
+        frames per second, but 88200 samples, totalling at 176400 bytes.
+        (Be mindful that in common parlance, the term "sample" is sometimes used
+        interchangably with "frame", which can be dangerous.)
+      </p>
+    </section>
+    <section data-substep="5">
+      <p>
+        And then we clean up like the wonderful people we are.
+      </p>
+      <p>
+        Again, not a whole lot of things happening, but at least we're still
+        rolling without errors.
+      </p>
+    </section>
+  </article>
+  
+  <article data-step="thread-init">
+    <h2>Firing up a thread</h2>
+    <p>
+      Audio by its nature is a background operation, so we'll need to somehow
+      run it in the background - in a modern operating system, this is what
+      <a href="https://en.wikipedia.org/wiki/Thread_(computing)">threads</a> are for;
+      if you're not familiar with them, just think about a thread as a function
+      call that runs in the background. As you can imagine, inter-thread
+      communication can get super complicated, but luckily for our use case
+      we don't need to worry about that.
+    </p>
+    <section data-substep="1">
+      <p>
+        This is our thread function. Right now it does nothing and quits
+        immediately, ending the thread. This, for now, is fine.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        Here we start the thread; this is all simple stuff that's
+        <a href="https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createthread">thoroughly documented</a>
+        so we won't spend a lot of time on it here; all you need to know is that
+        when you call <code>CreateThread</code>, your main thread will continue
+        execution further, while simultaneously <code>ThreadProc</code> will also
+        start running concurrently.
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        Because we don't want audio to interrupt, we prefer putting our thread
+        to have the highest possible priority.
+      </p>
+      <p>
+        And this is it - since threads exit by themselves, we don't need any sort
+        of cleanup.
+      </p>
+    </section>
+  </article>
+  
+  <article data-step="thread-logic">
+    <h2>Setting up the thread logic</h2>
+    <p>
+      So we have a thread running that quits immediately, what do we do next?
+    </p>
+    <p>
+      Well, what we need is our thread to continually feed the music data we wants to
+      play into the WASAPI buffer, but also stop doing that and quit when the main
+      thread tells it to stop. 
+    </p>
+    <p>
+      So let's do that.
+    </p>
+    <section data-substep="1">
+      <p>
+        First, we need two <a href="https://en.wikipedia.org/wiki/Flag_(programming)">flags</a>:
+        <code>shouldExit</code> will be written into by the main thread to tell the
+        thread to quit when it's <code>true</code>, while <code>inThread</code>
+        will be written into by the audio renderer thread, and will signal to
+        the main thread when it has finally finished; this latter is needed
+        in order to be sure that the thread has quit so that we don't cause a
+        crash trying to deallocate resources while it's still running even
+        though we told it to stop.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        First, in the thread, we tell the audio client to start playing. This is
+        what actually begins playing the audio.
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        Next, we reset the two flags in our audio thread, and start rendering
+        until we're told to stop; we'll leave this empty for now and come back
+        to it in a moment. (The
+        <a href="https://learn.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-sleep"><code>Sleep()</code></a>
+        call is merely to yield the CPU when
+        we're not doing anything.)
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        If we're told to stop, tell the client to stop playing, signal we're done,
+        and exit the thread cleanly.
+      </p>
+    </section>
+    <section data-substep="5">
+      <p>
+        Inside the main thread, since now our audio thread loops, once we're
+        finished with our replay, tell the thread to exit, then wait for it to
+        exit.
+      </p>
+      <p>
+        To recap here, this is our expected sequence of events:
+      </p>
+      <ol>
+        <li>We start the thread using <code>CreateThread</code>.</li>
+        <li>The main thread enters the mainloop.</li>
+        <li>The audio thread enters its own loop - right now neither of them do 
+        anything.</li>
+        <li>If we press a key, the main thread exits its own loop while the 
+        audio is still running its own.</li>
+        <li>The main thread signals, through <code>shouldExit = true;</code>, 
+        to the audio thread that it should finish up. It then busywaits until
+        <code>inThread == false</code></li>
+        <li>The audio thread, seeing <code>shouldExit == true</code>,
+        leaves its own loop, stops audio, sets <code>inThread</code> to
+        <code>false</code> and exits cleanly.</li>
+        <li>The main thread exits out of the busy wait loop and begins
+        deallocating. Tidy!</li>
+      </ol>
+      <p>
+        One thing to mention here is that using simple <code>bool</code> flags
+        and no things like
+        <a href="https://en.wikipedia.org/wiki/Critical_section">critical sections</a>
+        or <a href="https://en.wikipedia.org/wiki/Lock_(computer_science)">locks</a>
+        will work <i>in this use case</i> but not in more complex situations;
+        feel free to play <a href="https://deadlockempire.github.io/">The
+        Deadlock Empire</a> if you want to learn more about why.
+      </p>
+    </section>
+  </article>
+  
+  <article data-step="wasapi-render">
+    <h2>Setting up a renderer</h2>
+    <p>
+      Now that we have an audio thread and the two loops, we'll need an audio
+      renderer that feeds the audio data from our music through a buffer to the
+      actual sound device.
+    </p>
+    <section data-substep="1">
+      <p>
+        This will be the actual renderer object.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        Next, we create it through the audio client.
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        And then we add the rendering to the thread - but first we need to
+        understand how modern audio works:
+      </p>
+      <p>
+        Audio buffers are <a href="https://en.wikipedia.org/wiki/Circular_buffer">ring buffers</a>
+        and have a play cursor continually moving forwards in them and wrapping
+        around when the end is reached; think about it as a vinyl record that,
+        instead of a spiral groove, has a circular locked groove that it keeps
+        replaying over and over. What we can do, however, is simply write to
+        the buffer somewhere ahead of the play cursor (our "needle") so that 
+        by the time the cursor gets there, the buffer is already filled.
+      </p>
+      <p>
+        There are two schools of thought here: an interactive application like
+        a video game will try to keep this gap as low as possible, since the
+        sound needs to play as soon as the main thread requests it. In our case,
+        however, since the music never changes, we can effectively be ahead of
+        the cursor almost a full buffer's length (i.e. we're almost
+        "behind" the cursor) and have no perceptible difference. So we'll do that:
+      </p>
+      <ol>
+        <li>
+          First, we get <a href="https://learn.microsoft.com/en-us/windows/win32/api/audioclient/nf-audioclient-iaudioclient-getcurrentpadding">the
+          "padding"</a> of the current audio replay; this effectively means how
+          much of the buffer (again, in frames) we <i>shouldn't</i> touch. 
+        </li>
+        <li>
+          If we subtract this value from our full buffer size, we get a value of
+          how much the cursor effectively advanced.
+        </li>
+        <li>
+          If this value is non-zero, we can request that amount of frames from
+          the buffer, we fill it (later) and then tell the render client that
+          we're done.
+        </li>
+      </ol>
+      <p>
+        This, by the way, is absolutely by the book and how
+        <a href="https://learn.microsoft.com/en-us/windows/win32/coreaudio/rendering-a-stream">Microsoft
+        themselves suggest doing it</a>.
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        And of course we clean up the render client as well.
+      </p>
+      <p>
+        So now we have most things in place, except we're not putting anything
+        into our buffer so we're playing back silence (although feel free to
+        put a sine wave or white noise in there for giggles) - let's fix that.
+      </p>
+    </section>
+  </article>
+  
+  <article data-step="mp3">
+    <h2>Loading an MP3</h2>
+    <p>
+      For music decoding, we're going to use <a href="https://github.com/mackron/dr_libs/blob/0b12cb573cde44dc2b7aead3fc35c20a9d822f78/dr_mp3.h">dr_mp3</a>,
+      which is a simple single-file MP3 decoding library; there are a ton of
+      similar libraries for various other formats of course
+      (<a href="https://github.com/nothings/stb/blob/1ee679ca2ef753a528db5ba6801e1067b40481b8/stb_vorbis.c">stb_vorbis</a>
+      is a popular example) so feel free to substitute this, but we'll just stick
+      for this for now.
+    </p>
+    <section data-substep="1">
+      <p>
+        We start by including the header.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        We then declare the actual MP3 object.
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        We then load the file. (As usual, supplying the actual MP3 is an exercise
+        left up to the reader.)
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        In the thread, we tell the MP3 decoder to decode the amount of frames
+        into signed 16-bit format into our buffer.
+      </p>
+    </section>
+    <section data-substep="5">
+      <p>
+        And then we deallocate.
+      </p>
+      <p>
+        Practically speaking, we're done! We have an MP3 playing! Whee!
+      </p>
+      <p>
+        ...Except we (probably) need one more thing.
+      </p>
+    </section>
+  </article>
+  
+  <article data-step="wasapi-clock">
+    <h2>Reading the timer</h2>
+    <p>
+      See, if we're writing a demo, we will probably need a way to tell where
+      the audio replay is at so that we can synchronize our visuals to it - we
+      could just use a system timer, but remember, part of the reason for this
+      exercise is that we're trying to have the most accurate timer we can, so
+      let's go.
+    </p>
+    <p>
+      For this, we're doing to use a WASAPI feature called the "audio clock".
+    </p>
+    <section data-substep="1">
+      <p>
+        This isn't strictly needed, it's just so that we can use <code>printf</code>.
+      </p>
+    </section>
+    <section data-substep="2">
+      <p>
+        We declare the clock object.
+      </p>
+    </section>
+    <section data-substep="3">
+      <p>
+        We create the clock object, and retrieve the clock frequency; this is 
+        needed because the position retrieval in WASAPI is based on a hardware
+        clock.
+      </p>
+    </section>
+    <section data-substep="4">
+      <p>
+        We then retrieve the position, and divide it with the clock frequency;
+        this will give you the current audio replay position measured in seconds.
+      </p>
+    </section>
+    <section data-substep="5">
+      <p>
+        And we then clean up after ourselves.
+      </p>
+    </section>
+  </article>
+  
+  <article data-step="outro">
+    <h2>And that's it.</h2>
+    <p>
+      We have an MP3 playing and a highly accurate timer telling us where it is.
+    </p>
+    <p>
+      So where can you go from here? Well, first you'll probably want to
+      turn all this into a library so that you can plug it into your engine;
+      you might also want to support more than one format, and you could also
+      use this to turn this into a softsynth for a 64k intro.
+    </p>
+  </article>
+  <button id="next">Next</button>
+</main>
+<aside id="code">
+
+  <pre data-step="wasapi-clock"       data-substep="1"><code class="language-cpp">#include &lt;stdio.h&gt;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="1"><code class="language-cpp">#include &lt;conio.h&gt;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="1"><code class="language-cpp">#include &lt;mmdeviceapi.h&gt;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="1"><code class="language-cpp">#include &lt;audioclient.h&gt;</code></pre>
+  <pre data-step="mp3"                data-substep="1"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="mp3"                data-substep="1"><code class="language-cpp">#define DR_MP3_IMPLEMENTATION</code></pre>
+  <pre data-step="mp3"                data-substep="1"><code class="language-cpp">#include "dr_mp3.h"</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">const int sampleRate = 44100;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">const int channelCount = 2;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">const int sampleSize = sizeof( short );</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">WAVEFORMATEX waveFormat = </code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">{</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">  /* wFormatTag      */ WAVE_FORMAT_PCM,</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">  /* nChannels       */ channelCount,</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">  /* nSamplesPerSec  */ sampleRate,</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">  /* nAvgBytesPerSec */ sampleRate * sampleSize * channelCount,</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">  /* nBlockAlign     */ sampleSize * channelCount,</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">  /* wBitsPerSample  */ 8 * sampleSize,</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">  /* cbSize          */ 0,</code></pre>
+  <pre data-step="wasapi-client"      data-substep="3"><code class="language-cpp">};</code></pre>
+  <pre data-step="wasapi-init"        data-substep="2"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="2"><code class="language-cpp">IMMDeviceEnumerator * enumerator = nullptr;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="2"><code class="language-cpp">IMMDevice * device = nullptr;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="2"><code class="language-cpp">IAudioClient * audioClient = nullptr;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="1"><code class="language-cpp">IAudioRenderClient * audioRenderClient = nullptr;</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="2"><code class="language-cpp">IAudioClock * audioClock = nullptr;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="2"><code class="language-cpp">unsigned int bufferFrameCount = 0;</code></pre>
+  <pre data-step="thread-logic"       data-substep="1"><code class="language-cpp">bool shouldExit = false;</code></pre>
+  <pre data-step="thread-logic"       data-substep="1"><code class="language-cpp">bool inThread = false;</code></pre>
+  <pre data-step="mp3"                data-substep="2"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="mp3"                data-substep="2"><code class="language-cpp">drmp3 mp3;</code></pre>
+  <pre data-step="thread-init"        data-substep="1"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="thread-init"        data-substep="1"><code class="language-cpp">DWORD __stdcall ThreadProc( LPVOID _param )</code></pre>
+  <pre data-step="thread-init"        data-substep="1"><code class="language-cpp">{</code></pre>
+  <pre data-step="thread-logic"       data-substep="2"><code class="language-cpp">  if ( audioClient->Start() != S_OK )</code></pre>
+  <pre data-step="thread-logic"       data-substep="2"><code class="language-cpp">  {</code></pre>
+  <pre data-step="thread-logic"       data-substep="2"><code class="language-cpp">    return 0;</code></pre>
+  <pre data-step="thread-logic"       data-substep="2"><code class="language-cpp">  }</code></pre>
+  <pre data-step="thread-logic"       data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="thread-logic"       data-substep="3"><code class="language-cpp">  shouldExit = false;</code></pre>
+  <pre data-step="thread-logic"       data-substep="3"><code class="language-cpp">  inThread = true;</code></pre>
+  <pre data-step="thread-logic"       data-substep="3"><code class="language-cpp">  while ( !shouldExit )</code></pre>
+  <pre data-step="thread-logic"       data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">    unsigned int numFramesPadding = 0;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">    audioClient->GetCurrentPadding( &numFramesPadding );</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">    const unsigned int framesRemaining = bufferFrameCount - numFramesPadding;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">    if ( framesRemaining )</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">    {</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">      unsigned char * buffer = nullptr;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">      audioRenderClient->GetBuffer( framesRemaining, &buffer );</code></pre>
+  <pre data-step="mp3"                data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="mp3"                data-substep="4"><code class="language-cpp">      drmp3_read_pcm_frames_s16( &mp3, framesRemaining, (drmp3_int16 *)buffer );</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">      audioRenderClient->ReleaseBuffer( framesRemaining, 0 );</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">    }</code></pre>
+  <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="thread-logic"       data-substep="3"><code class="language-cpp">    Sleep( 3 );</code></pre>
+  <pre data-step="thread-logic"       data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="thread-logic"       data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="thread-logic"       data-substep="4"><code class="language-cpp">  audioClient->Stop();</code></pre>
+  <pre data-step="thread-logic"       data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="thread-logic"       data-substep="4"><code class="language-cpp">  inThread = false;</code></pre>
+  <pre data-step="thread-logic"       data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="thread-init"        data-substep="1"><code class="language-cpp">  return 0;</code></pre>
+  <pre data-step="thread-init"        data-substep="1"><code class="language-cpp">}</code></pre>
+  <pre data-step="wasapi-init"        data-substep="2"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="stub"               data-substep="1"><code class="language-cpp">int main()</code></pre>
+  <pre data-step="stub"               data-substep="1"><code class="language-cpp">{</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">  if ( CoInitialize( nullptr ) != S_OK )</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">  if ( CoCreateInstance( __uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void **)&enumerator ) != S_OK )</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">  if ( enumerator->GetDefaultAudioEndpoint( eRender, eConsole, &device ) != S_OK )</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  if ( device->Activate( __uuidof(IAudioClient), CLSCTX_ALL, NULL, (void **)&audioClient ) != S_OK )</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  const REFERENCE_TIME bufferDuration = 10000000; // 100 nanosecond units</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  if ( audioClient->Initialize( AUDCLNT_SHAREMODE_SHARED, 0, bufferDuration, 0, &waveFormat, 0 ) != S_OK )</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  if ( audioClient->GetBufferSize( &bufferFrameCount ) != S_OK )</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="4"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-render"      data-substep="2"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="2"><code class="language-cpp">  if ( audioClient->GetService( __uuidof(IAudioRenderClient), (void **)&audioRenderClient ) != S_OK )</code></pre>
+  <pre data-step="wasapi-render"      data-substep="2"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-render"      data-substep="2"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="2"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="3"><code class="language-cpp">  if ( audioClient->GetService( __uuidof(IAudioClock), (void **)&audioClock ) != S_OK )</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="3"><code class="language-cpp">  unsigned long long clockFrequency = 0;</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="3"><code class="language-cpp">  if ( audioClock->GetFrequency( &clockFrequency ) != S_OK )</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="mp3"                data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="mp3"                data-substep="3"><code class="language-cpp">  if ( !drmp3_init_file( &mp3, "audio.mp3", nullptr ) ) </code></pre>
+  <pre data-step="mp3"                data-substep="3"><code class="language-cpp">  {</code></pre>
+  <pre data-step="mp3"                data-substep="3"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="mp3"                data-substep="3"><code class="language-cpp">  }</code></pre>
+  <pre data-step="thread-init"        data-substep="2"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="thread-init"        data-substep="2"><code class="language-cpp">  DWORD threadID = 0;</code></pre>
+  <pre data-step="thread-init"        data-substep="2"><code class="language-cpp">  HANDLE threadHandle = CreateThread( nullptr, 0, ThreadProc, nullptr, 0, (LPDWORD)&threadID );</code></pre>
+  <pre data-step="thread-init"        data-substep="2"><code class="language-cpp">  if ( threadHandle == NULL )</code></pre>
+  <pre data-step="thread-init"        data-substep="2"><code class="language-cpp">  {</code></pre>
+  <pre data-step="thread-init"        data-substep="2"><code class="language-cpp">    return 1;</code></pre>
+  <pre data-step="thread-init"        data-substep="2"><code class="language-cpp">  }</code></pre>
+  <pre data-step="thread-init"        data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="thread-init"        data-substep="3"><code class="language-cpp">  SetThreadPriority( threadHandle, THREAD_PRIORITY_TIME_CRITICAL );</code></pre>
+  <pre data-step="wasapi-init"        data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="4"><code class="language-cpp">  while ( !_kbhit() )</code></pre>
+  <pre data-step="wasapi-init"        data-substep="4"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="4"><code class="language-cpp">    unsigned long long position = 0;</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="4"><code class="language-cpp">    if ( audioClock->GetPosition( &position, nullptr ) != S_OK )</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="4"><code class="language-cpp">    {</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="4"><code class="language-cpp">      return 1;</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="4"><code class="language-cpp">    }</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="4"><code class="language-cpp">    double timeInSeconds = position / (double)clockFrequency;</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="4"><code class="language-cpp">    printf( "%.2f\r", timeInSeconds );</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="4"><code class="language-cpp">    </code></pre>
+  <pre data-step="wasapi-init"        data-substep="4"><code class="language-cpp">    Sleep( 1 );</code></pre>
+  <pre data-step="wasapi-init"        data-substep="4"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-init"        data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="thread-logic"       data-substep="5"><code class="language-cpp">  shouldExit = true;</code></pre>
+  <pre data-step="thread-logic"       data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="thread-logic"       data-substep="5"><code class="language-cpp">  while ( inThread ) Sleep( 3 );</code></pre>
+  <pre data-step="thread-logic"       data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="mp3"                data-substep="5"><code class="language-cpp">  drmp3_uninit( &mp3 );</code></pre>
+  <pre data-step="mp3"                data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="5"><code class="language-cpp">  if ( audioClock )</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="5"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="5"><code class="language-cpp">    audioClock->Release();</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="5"><code class="language-cpp">    audioClock = nullptr;</code></pre>
+  <pre data-step="wasapi-clock"       data-substep="5"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-render"      data-substep="4"><code class="language-cpp">  if ( audioRenderClient )</code></pre>
+  <pre data-step="wasapi-render"      data-substep="4"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-render"      data-substep="4"><code class="language-cpp">    audioRenderClient->Release();</code></pre>
+  <pre data-step="wasapi-render"      data-substep="4"><code class="language-cpp">    audioRenderClient = nullptr;</code></pre>
+  <pre data-step="wasapi-render"      data-substep="4"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-client"      data-substep="5"><code class="language-cpp">  if ( audioClient )</code></pre>
+  <pre data-step="wasapi-client"      data-substep="5"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-client"      data-substep="5"><code class="language-cpp">    audioClient->Release();</code></pre>
+  <pre data-step="wasapi-client"      data-substep="5"><code class="language-cpp">    audioClient = nullptr;</code></pre>
+  <pre data-step="wasapi-client"      data-substep="5"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  if ( device )</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">    device->Release();</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">    device = nullptr;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  if ( enumerator )</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  {</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">    enumerator->Release();</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">    enumerator = nullptr;</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">  }</code></pre>
+  <pre data-step="wasapi-init"        data-substep="5"><code class="language-cpp">&nbsp;</code></pre>
+  <pre data-step="stub"               data-substep="1"><code class="language-cpp">  return 0;</code></pre>
+  <pre data-step="stub"               data-substep="1"><code class="language-cpp">}</code></pre>
+</aside>
+
+
+</html>
