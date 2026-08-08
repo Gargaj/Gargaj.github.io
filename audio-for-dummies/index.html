@@ -704,7 +704,9 @@
     <section data-substep="4">
       <p>
         In the thread, we tell the MP3 decoder to decode the amount of frames
-        into signed 16-bit format into our buffer.
+        into signed 16-bit format into our buffer, and zero out the rest of
+        the buffer just in case we ran out of MP3 data (by reaching the end)
+        and the buffer we got is filled with some junk.
       </p>
     </section>
     <section data-substep="5">
@@ -817,7 +819,8 @@
   <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">  unsigned char * buffer = nullptr;</code></pre>
   <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">  audioRenderClient->GetBuffer( _frameCount, &buffer );</code></pre>
   <pre data-step="mp3"                data-substep="4"><code class="language-cpp">&nbsp;</code></pre>
-  <pre data-step="mp3"                data-substep="4"><code class="language-cpp">  drmp3_read_pcm_frames_s16( &mp3, _frameCount, (drmp3_int16 *)buffer );</code></pre>
+  <pre data-step="mp3"                data-substep="4"><code class="language-cpp">  int framesRead = drmp3_read_pcm_frames_s16( &mp3, _frameCount, (drmp3_int16 *)buffer );</code></pre>
+  <pre data-step="mp3"                data-substep="4"><code class="language-cpp">  memset( buffer + framesRead * sizeof( drmp3_int16 ) * 2, 0, ( _frameCount - framesRead ) * sizeof( drmp3_int16 ) * 2 );</code></pre>
   <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">&nbsp;</code></pre>
   <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">  audioRenderClient->ReleaseBuffer( _frameCount, 0 );</code></pre>
   <pre data-step="wasapi-render"      data-substep="3"><code class="language-cpp">}</code></pre>
